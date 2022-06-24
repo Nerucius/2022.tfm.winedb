@@ -1,0 +1,188 @@
+{% extends "web/base.html" %}
+{% load static %}
+
+{% block title %} | {{wine_id}}{% endblock title %}
+
+{% block style %}
+<style>
+    .parallax-container{
+        min-height:160px
+    }
+    .v-cloack{
+      display:none !important;
+    }
+    dt{
+      font-weight: bold;
+      margin-top: 12px;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+<div id="index-banner" class="parallax-container">
+  <div class="section">
+
+    <div class="container">
+    </div>
+
+  </div>
+  <div class="parallax"><img src="{% static 'web/background7.jpg' %}"></div>
+</div>
+
+<div class="container" id="app">
+    <div class="section" class="v-cloack" v-if="wine">
+
+        <!--   Icon Section   -->
+        <div class="row">
+            <div class="col s12">
+
+              <h1>[[ wine.nombre ]]</h1>
+
+              <h2>Caracteristicas</h2>
+
+              <dd>
+                <dt>Pais</dt>
+                <dd>[[wine.pais.nombre]]</dd>
+                <dt>D.O.</dt>
+                <dd>[[wine.zona.nombre]]</dd>
+                <dt>Any</dt>
+                <dd>[[wine.anyo]]</dd>
+                <dt>Tipologia</dt>
+                <dd>[[wine.tipoVino.es]]</dd>
+                <dt>Bodega</dt>
+                <dd>[[wine.bodega.nombre]]</dd>
+              </dd>
+
+              <h2>Vins Recomanats</h2>
+
+              <p>Vins semblans a "[[wine.nombre]]".</p>
+
+              <table class="highlight">
+                <thead>
+                  <tr>
+                      <th>Rank</th>
+                      <th>Nom</th>
+                      <th>Score</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  <tr v-for="sWine, i in similarWines">
+                    <td>#[[ i+1 ]]</td>
+                    <td>
+                      <a :href="'{% url 'wine-detail-base' %}' + sWine.name">
+                        [[ sWine.name ]]
+                      </a>
+                    </td>
+                    <td>[[ sWine.score ]]</td>
+                  </tr>
+                </tbody>
+              </table>
+
+
+
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script >
+
+    const { createApp } = Vue
+
+    createApp({
+      delimiters: ['[[', ']]'],
+
+      data() {
+        return {
+          wineId: '{{ wine_id }}',
+          wine: null,
+          similarWines: [],
+        }
+      },
+
+      async mounted() {
+        console.log(`VUE OK`)
+        await this.fetchWine();
+        this.fetchSimilarWines();
+      },
+
+      methods:{
+          async fetchWine(){
+            var data = await fetch(`{% static 'web/wine_list.json' %}`)
+            let wineList = await data.json()
+            
+
+            wineList = [
+              ...wineList[0],
+              ...wineList[1],
+              ...wineList[2],
+              ...wineList[3],
+              ...wineList[4],
+              ...wineList[5],
+              ...wineList[6],
+              ...wineList[7],
+              ...wineList[8],
+              ...wineList[9],
+              ...wineList[10],
+              ...wineList[11],
+              ...wineList[12],
+              ...wineList[13],
+              ...wineList[14],
+              ...wineList[15],
+              ...wineList[16],
+              ...wineList[17],
+              ...wineList[18],
+              ...wineList[19],
+              ...wineList[20],
+              ...wineList[21],
+              ...wineList[22],
+              ...wineList[23],
+              ...wineList[24],
+              ...wineList[25],
+              ...wineList[26],
+            ]
+
+            let wineData = wineList.filter(w => w.url == this.wineId)
+
+            // let allWineData = []
+            // wineData.map(wd => allWineData.concat(wd))
+
+            this.wine = wineData[0]
+          },
+
+          async fetchSimilarWines(){
+            var data = await fetch(`{% url 'api-wine-ml-base' %}${this.wine.url}/similar/`)
+            let similarWines = await data.json()
+
+            similarWinesList = []
+            let show = 10
+
+            for(similar in similarWines.CS){
+              similarWinesList = [
+                ...similarWinesList,
+                { 
+                  name: similar,
+                  score: similarWines.CS[similar]
+                }
+              ]
+              show--;
+              if (show == 0) break;
+            }
+
+            this.similarWines = similarWinesList
+
+          }
+      }
+
+    }).mount('#app')
+
+</script>
+
+{% endblock scripts %}

@@ -1,0 +1,72 @@
+# Development Version
+# Using Debug Django Server
+# Using Watcher Node
+version: "2"
+
+services:
+  django:
+    build: "./django"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=${DJANGO_DEBUG}
+      - CACHE_REDIS=${DJANGO_CACHE_REDIS}
+      - CACHE_REDIS_HOST=${DJANGO_CACHE_REDIS_HOST}
+      - DB_SQLITE=${DJANGO_DB_SQLITE}
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - STATIC_URL=${DJANGO_STATIC_URL}
+      - ALLOWED_HOST=${DJANGO_ALLOWED_HOST}
+      - CORS_ORIGIN=${DJANGO_CORS_ORIGIN}
+      - FRONTEND_URL=${DJANGO_FRONTEND_URL}
+      - BACKEND_URL=${DJANGO_BACKEND_URL}
+      - EMAIL_HOST=${DJANGO_EMAIL_HOST}
+      - EMAIL_USE_TLS=${DJANGO_EMAIL_USE_TLS}
+      - EMAIL_PORT=${DJANGO_EMAIL_PORT}
+      - EMAIL_HOST_USER=${DJANGO_EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${DJANGO_EMAIL_HOST_PASSWORD}
+      - GMAIL_USER=${DJANGO_GMAIL_USER}
+
+    ports:
+      - "${DJANGO_PORT}:8080"
+    volumes:
+      - "./django/backend:/app/backend"
+      - "./django/server:/app/server"
+      - "static_files:/static"
+
+  db:
+    image: postgres:11-alpine
+    restart: unless-stopped
+    # ports:
+    #   - '${POSTGRES_EXT_PORT}:5432'
+    environment:
+      - POSTGRES_DB=django
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/data/postgres
+    volumes:
+      - "db_files:/data"
+
+  # vuetify:
+  #   build: "./vuetify"
+  #   environment:
+  #     - VUE_APP_API_SERVER
+  #     - VUE_APP_I18N_LOCALE
+  #     - VUE_APP_I18N_FALLBACK_LOCALE
+  #     - VUE_APP_ANALYTICS_SITE_URL
+  #     - VUE_APP_ANALYTICS_SITE_ID
+  #   volumes:
+  #     # - "./vuetify/src:/vuetify/src"
+  #     - "static_files:/vuetify/dist"
+
+  # nginx:
+  #   build: "./nginx"
+  #   ports:
+  #     - "${HTTPD_PORT}:80"
+  #   volumes:
+  #     - "static_files:/usr/share/nginx/html"
+  #     - "upload_files:/usr/share/nginx/html/uploads"
+
+volumes:
+  db_files: {}
+  static_files: {}
+  upload_files: {}

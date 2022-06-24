@@ -1,0 +1,186 @@
+{% extends "web/base.html" %}
+{% load static %}
+
+{% block title %} | Wine List{% endblock title %}
+
+{% block style %}
+<style>
+    .parallax-container{
+        min-height:300px
+    }
+    .v-cloack{
+      display:none !important;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+<div id="index-banner" class="parallax-container">
+    <div class="section">
+
+      <div class="container">
+        <h1 class="header center white-text">All Wines</h1>
+        <div class="row center">
+          <h5 class="header col s12 light">List of all wines here</h5>
+        </div>
+      </div>
+
+    </div>
+    <div class="parallax"><img src="{% static 'web/background8.jpg' %}"></div>
+</div>
+
+<div class="container" id="app">
+    <div class="section" class="v-cloack">
+
+        <!--   Icon Section   -->
+        <div class="row">
+            <div class="col s12">
+
+              <div class="row">
+                <div class="col s12 m6">
+                </div>
+                <div class="col s12 m6">
+                  <label for="search">Search Wine</label>
+                  <input type="text" name="search" v-model="search">
+                </div>
+              </div>
+
+
+                  <table class="highlight">
+                    <thead>
+                      <tr>
+                          <th>Nom</th>
+                          <th>Tipologia</th>
+                          <th>D.O.</th>
+                      </tr>
+                    </thead>
+            
+                    <tbody>
+                      <tr v-for="wine in wines">
+                        <td>
+                          <a :href="'{% url 'wine-detail-base' %}' + wine.url">
+                            [[ wine.nombre ]]
+                          </a>
+                        </td>
+                        <td>[[ wine.tipoVino.es ]]</td>
+                        <td>[[ wine.zona.nombre ]]</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <br>
+                  <br>
+
+                  <div class="center">
+                    <button @click="prevPage" :disabled="page == 1" class="btn burgundy">&lt;</button>
+                    &nbsp;&nbsp;
+                    <button disabled class="btn btn-flat">[[ page ]]</button>
+                    &nbsp;&nbsp;
+                    <button @click="nextPage" class="btn burgundy">&gt;</button>
+                  </div>
+
+                  <br>
+
+
+
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script >
+
+    const { createApp } = Vue
+
+    createApp({
+      delimiters: ['[[', ']]'],
+
+      data() {
+        return {
+          search: '',
+          allWines: [],
+          start: 0,
+          end: 15,
+          page: 1,
+        }
+      },
+
+      mounted() {
+        console.log(`VUE OK`)
+        this.fetchWines();
+      },
+
+      computed: {
+        wines(){
+          let wineList = this.allWines;
+          if(this.search.length != 0){
+            wineList = wineList.filter(w => w.nombre.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)
+          }
+          
+          return wineList.slice(this.start, this.end)
+        }
+      },
+
+      methods:{
+          nextPage(){
+            this.page += 1
+            this.start += 15
+            this.end += 15
+          },
+          
+          prevPage(){
+            if(this.page <= 1) return;
+            this.page -= 1
+            this.start -= 15
+            this.end -= 15
+          },
+
+          async fetchWines(){
+              var data = await fetch(`{% static 'web/wine_list.json' %}`)
+              let wineList = await data.json()
+
+              wineList = [
+              ...wineList[0],
+              ...wineList[1],
+              ...wineList[2],
+              ...wineList[3],
+              ...wineList[4],
+              ...wineList[5],
+              ...wineList[6],
+              ...wineList[7],
+              ...wineList[8],
+              ...wineList[9],
+              ...wineList[10],
+              ...wineList[11],
+              ...wineList[12],
+              ...wineList[13],
+              ...wineList[14],
+              ...wineList[15],
+              ...wineList[16],
+              ...wineList[17],
+              ...wineList[18],
+              ...wineList[19],
+              ...wineList[20],
+              ...wineList[21],
+              ...wineList[22],
+              ...wineList[23],
+              ...wineList[24],
+              ...wineList[25],
+              ...wineList[26],
+            ]
+
+              this.allWines = wineList
+          }
+      }
+
+    }).mount('#app')
+
+</script>
+
+{% endblock scripts %}

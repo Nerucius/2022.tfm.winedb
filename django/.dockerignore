@@ -1,0 +1,5 @@
+.dockerignore
+.vscode
+/env
+*.py[cod]
+*.sqlite3

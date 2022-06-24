@@ -1,0 +1,16 @@
+# Project Config
+.env
+# Virtualenv
+/env*/
+
+
+# Django
+/static/
+
+**/__pycache__
+._*
+*.py[cod]
+/*.sqlite3
+*.log
+*.pot
+local_settings.py
