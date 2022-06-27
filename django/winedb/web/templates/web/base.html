@@ -11,6 +11,12 @@
   <!-- Compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" href="{% static 'web/style.css' %}">
+
+  <!-- leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+  integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+  crossorigin=""/>
+
   {% block style %}{% endblock style %}
 </head>
 <body>
@@ -23,10 +29,12 @@
         <ul class="right hide-on-med-and-down">
           <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="{% url 'wine-list' %}">Wine List</a></li>
+          <li><a href="{% url 'find-wine' %}">Find a Wine</a></li>
         </ul>
         <ul id="nav-mobile" class="sidenav">
           <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="{% url 'wine-list' %}">Wine List</a></li>
+          <li><a href="{% url 'find-wine' %}">Find a Wine</a></li>
         </ul>
         <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
       </div>
@@ -74,7 +82,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="{% static 'web/init.js' %}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.37/vue.global.min.js" integrity="sha512-rCO3ZZnxh9j/Y725Iq2Cqr2lc9fi83zVeN3PFTUosktylZsCFjD13PDbKrzKjKO/idjM4KlMQC52AsoGFTAe6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+   integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+   crossorigin=""></script>
   {% block scripts %}{% endblock scripts %}
 </body>
 </html>

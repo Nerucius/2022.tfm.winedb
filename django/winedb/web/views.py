@@ -10,3 +10,6 @@ def wine_list(request):
 
 def wine_detail(request, wine_id):
     return render(request, 'web/wine_detail.html', {'wine_id': wine_id})
+
+def find_wine(request):
+    return render(request, 'web/find_wine.html')

@@ -158,7 +158,7 @@
           },
 
           async fetchSimilarWines(){
-            var data = await fetch(`{% url 'api-wine-ml-base' %}${this.wine.url}/similar/`)
+            let data = await fetch(`{% url 'api-wine-ml-base' %}${this.wine.url}/similar/`)
             let similarWines = await data.json()
 
             similarWinesList = []
