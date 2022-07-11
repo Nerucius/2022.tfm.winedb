@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 
 class CBR:
@@ -26,3 +27,41 @@ class CBR:
         cosine_similarity_df = cosine_similarity_df.rename(columns = {cosine_similarity_df.columns[0]:"CS"}) # rename pandas column
         
         return cosine_similarity_df.iloc[1: , :] # The first row is the wine_id
+
+class CBRDO:
+    def __init__(self,represented_items,features):
+
+         self.represented_items = represented_items
+         self.features = features
+         self.all_wine_data = represented_items[features]
+    
+    def predict(self,desired_features):
+
+        # Creating wine vector
+        wine_vector = np.zeros(len(self.features))
+
+        i=0
+        for feature in self.features:
+            if feature in desired_features: 
+                wine_vector[i] = 1
+            
+            i += 1
+        
+        # Calculating cosine similarity
+        # TODO we could calculate it in other ways
+        num_similarity_vector = self.all_wine_data.values @ wine_vector.T
+        den_similarity_vector = np.linalg.norm(self.all_wine_data.values, axis=1) * np.linalg.norm(wine_vector)
+        
+        similarity = num_similarity_vector / den_similarity_vector
+        
+        # Construct DataFrame for returning data consistency to the front end
+
+        most_similar_wines = pd.DataFrame(index=self.represented_items.id,data=similarity)
+        most_similar_wines = most_similar_wines.rename(columns={0:"CS"})
+        most_similar_wines = most_similar_wines.sort_values(by="CS",ascending=False)
+        return most_similar_wines
+
+        most_similar_ids = np.flip(np.argsort(similarity,))
+
+        return self.represented_items.id[most_similar_ids]
+

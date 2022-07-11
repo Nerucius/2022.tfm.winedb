@@ -1,0 +1,21 @@
+[{
+    "model": "api.wine",
+    "pk": "pocapena_2020_t",
+    "fields": {
+        "name": "Terres del Name",
+        "cellar_name": "Bodega Test",
+        "year": 2022,
+        "country": "España",
+        "varieties": "garnacha,tempranillo",
+        "wine_type": "tinto",
+        "wine_type_simple": "tinto",
+        "price": "12.95",
+        "ecologic": true,
+        "penin_points": 89,
+        "tasting_date": "2022-07-11",
+        "style": "suave,frutal,maduro",
+        "mouth": "seco",
+        "color": "oscuro",
+        "smell": "flores marchitas,fruta madura"
+    }
+}]
