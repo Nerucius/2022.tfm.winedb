@@ -15,6 +15,13 @@
       font-weight: bold;
       margin-top: 12px;
     }
+    #do-map{
+      height: 300px;
+    }
+    dd .btn-small{
+      margin: 10px 0;
+      margin-right: 20px;
+    }
 </style>
 {% endblock style %}
 
@@ -33,54 +40,95 @@
 <div class="container" id="app">
     <div class="section" class="v-cloack" v-if="wine">
 
+      <!--
+      <div class="row">
+        [[wine]]
+      </div>
+      -->
+
         <!--   Icon Section   -->
         <div class="row">
             <div class="col s12">
 
-              <h1>[[ wine.nombre ]]</h1>
+              <h1 class="center">
+                [[ wine.name ]] <br>
+                <small>——— [[wine.year]] ———</small>
+              </h1>
 
-              <h2>Caracteristicas</h2>
+              <div class="row">
+                <div class="col m6 s12">
+                  <dd>
+                    <dt>Pais</dt>
+                    <dd>[[wine.country]]</dd>
+                    <dt>D.O.</dt>
+                    <dd>[[wine.zone]]</dd>
+                    <dt>Any</dt>
+                    <dd>[[wine.year]]</dd>
+                    <dt>Bodega</dt>
+                    <dd>[[wine.cellar_name]]</dd>
+                    <dt>Precio</dt>
+                    <dd>[[wine.price]]€</dd>
+                    <dt>Puntos Peñin&trade;</dt>
+                    <dd>[[wine.penin_points]] /<small>100</small></dd>
+                  </dd>
+                </div>
+                <div class="col m6 s12">
+                  <div id="do-map"></div>
+                </div>
+              </div>
 
-              <dd>
-                <dt>Pais</dt>
-                <dd>[[wine.pais.nombre]]</dd>
-                <dt>D.O.</dt>
-                <dd>[[wine.zona.nombre]]</dd>
-                <dt>Any</dt>
-                <dd>[[wine.anyo]]</dd>
-                <dt>Tipologia</dt>
-                <dd>[[wine.tipoVino.es]]</dd>
-                <dt>Bodega</dt>
-                <dd>[[wine.bodega.nombre]]</dd>
-              </dd>
+              <h2 class="flow-text">Presentacion del Vino</h2>
 
-              <h2>Vins Recomanats</h2>
+              <div class="row">
+                <div class="col s12">
+                  <dd>
+                    <dt>Tipologia</dt>
+                    <dd>
+                      <span class="btn-flat btn-small green lighten-5">[[wine.wine_type]]</span>
+                    <dt>Variedades</dt>
+                    <dd>
+                      <span v-for="el in wine.varieties" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                    </dd>
+                    <dt>Estilo</dt>
+                    <dd>
+                      <span v-for="el in wine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                      <span v-for="el in wine.smell" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                      <span v-for="el in wine.mouth" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                      <span v-for="el in wine.color" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                    </dd>
+                  </dd>
+                </div>
+              </div>
 
-              <p>Vins semblans a "[[wine.nombre]]".</p>
+              <h2 class="flow-text">Otros vinos similares</h2>
 
               <table class="highlight">
                 <thead>
                   <tr>
-                      <th>Rank</th>
-                      <th>Nom</th>
-                      <th>Score</th>
+                      <th></th>
+                      <th>Vino</th>
+                      <th>DO / Bodega</th>
                   </tr>
                 </thead>
         
                 <tbody>
-                  <tr v-for="sWine, i in similarWines">
-                    <td>#[[ i+1 ]]</td>
+                  <tr v-for="wine, i in similarWines">
                     <td>
-                      <a :href="'{% url 'wine-detail-base' %}' + sWine.name">
-                        [[ sWine.name ]]
-                      </a>
+                      <b>[[ wine.similar_score ]]%</b>
                     </td>
-                    <td>[[ sWine.score ]]</td>
+                    <td>
+                      <a :href="'{% url 'wine-detail-base' %}' + wine.id">
+                        [[ wine.name ]] - [[ wine.year ]]
+                      </a><br>
+                      [[ wine.wine_type ]]
+                    </td>
+                    <td>
+                      [[ wine.zone ]]<br>
+                      [[ wine.cellar_name ]]
+                    </td>
                   </tr>
                 </tbody>
               </table>
-
-
 
             </div>
         </div>
@@ -93,7 +141,7 @@
 {% block scripts %}
 
 <script >
-
+ 
     const { createApp } = Vue
 
     createApp({
@@ -103,6 +151,7 @@
         return {
           wineId: '{{ wine_id }}',
           wine: null,
+          wineList: null,
           similarWines: [],
         }
       },
@@ -110,76 +159,54 @@
       async mounted() {
         console.log(`VUE OK`)
         await this.fetchWine();
-        this.fetchSimilarWines();
+        await this.fetchSimilarWines();
+        this.createMap();
       },
 
       methods:{
           async fetchWine(){
-            var data = await fetch(`{% static 'web/wine_list.json' %}`)
-            let wineList = await data.json()
+            var data = await fetch(`{% url 'api-wine-detail-base' %}${this.wineId}/`)
+            let wineResponse = await data.json()
             
-
-            wineList = [
-              ...wineList[0],
-              ...wineList[1],
-              ...wineList[2],
-              ...wineList[3],
-              ...wineList[4],
-              ...wineList[5],
-              ...wineList[6],
-              ...wineList[7],
-              ...wineList[8],
-              ...wineList[9],
-              ...wineList[10],
-              ...wineList[11],
-              ...wineList[12],
-              ...wineList[13],
-              ...wineList[14],
-              ...wineList[15],
-              ...wineList[16],
-              ...wineList[17],
-              ...wineList[18],
-              ...wineList[19],
-              ...wineList[20],
-              ...wineList[21],
-              ...wineList[22],
-              ...wineList[23],
-              ...wineList[24],
-              ...wineList[25],
-              ...wineList[26],
-            ]
-
-            let wineData = wineList.filter(w => w.url == this.wineId)
-
-            // let allWineData = []
-            // wineData.map(wd => allWineData.concat(wd))
-
-            this.wine = wineData[0]
+            this.wine = wineResponse.data
           },
 
           async fetchSimilarWines(){
-            let data = await fetch(`{% url 'api-wine-ml-base' %}${this.wine.url}/similar/`)
-            let similarWines = await data.json()
+            let data = await fetch(`{% url 'api-wine-ml-base' %}${this.wineId}/similar/`)
+            let wineResponse = await data.json()
 
-            similarWinesList = []
-            let show = 10
+            let similarWinesList = wineResponse.data.map(wine => {
+              return {
+                ...wine,
+                similar_score: Math.round((wine.similar_score*100))}
+            })
 
-            for(similar in similarWines.CS){
-              similarWinesList = [
-                ...similarWinesList,
-                { 
-                  name: similar,
-                  score: similarWines.CS[similar]
-                }
-              ]
-              show--;
-              if (show == 0) break;
-            }
+            similarWinesList = similarWinesList.sort((a,b) => b.similar_score - a.similar_score)
 
             this.similarWines = similarWinesList
+          },
 
+          createMap(){
+            console.log('createMap');
+  
+            var map = L.map('do-map',{
+              center: [0,0],
+              dragging: false,
+              scrollWheelZoom: "center",
+            }).setView([41.7,1.92], 7);
+            // https://stamen-tiles-a.a.ssl.fastly.net/toner/8/130/94@2x.png
+            var tiles = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}@2x.png', {
+              minZoom: 7,
+              maxZoom: 7,
+              attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+          },
+
+          wineData(wineId){
+            return this.wineList.filter(w => w.url == wineId)[0]
           }
-      }
+      },
+
 
     }).mount('#app')
 

@@ -42,7 +42,7 @@
                 </div>
                 <div class="col s12 m6">
                   <label for="search">Search Wine</label>
-                  <input type="text" name="search" v-model="search">
+                  <input type="text" name="search" v-model="search" @blur="searchWines">
                 </div>
               </div>
 
@@ -59,12 +59,12 @@
                     <tbody>
                       <tr v-for="wine in wines">
                         <td>
-                          <a :href="'{% url 'wine-detail-base' %}' + wine.url">
-                            [[ wine.nombre ]]
+                          <a :href="'{% url 'wine-detail-base' %}' + wine.id">
+                            [[ wine.name ]]
                           </a>
                         </td>
-                        <td>[[ wine.tipoVino.es ]]</td>
-                        <td>[[ wine.zona.nombre ]]</td>
+                        <td>[[ wine.wine_type_simple ]]</td>
+                        <td>[[ wine.zone ]]</td>
                       </tr>
                     </tbody>
                   </table>
@@ -77,7 +77,7 @@
                     &nbsp;&nbsp;
                     <button disabled class="btn btn-flat">[[ page ]]</button>
                     &nbsp;&nbsp;
-                    <button @click="nextPage" class="btn burgundy">&gt;</button>
+                    <button :disabled="nextLink == null" @click="nextPage" class="btn burgundy">&gt;</button>
                   </div>
 
                   <br>
@@ -108,6 +108,7 @@
           start: 0,
           end: 15,
           page: 1,
+          nextLink: null,
         }
       },
 
@@ -118,64 +119,49 @@
 
       computed: {
         wines(){
-          let wineList = this.allWines;
-          if(this.search.length != 0){
-            wineList = wineList.filter(w => w.nombre.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)
-          }
-          
-          return wineList.slice(this.start, this.end)
+          // let wineList = this.allWines;
+          // if(this.search.length != 0){
+          //   wineList = wineList.filter(w => w.nombre.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)
+          // }
+          // return wineList.slice(this.start, this.end)
+
+          return this.allWines
         }
       },
 
       methods:{
           nextPage(){
             this.page += 1
-            this.start += 15
-            this.end += 15
+            this.fetchWines();
           },
           
           prevPage(){
             if(this.page <= 1) return;
             this.page -= 1
-            this.start -= 15
-            this.end -= 15
+            this.fetchWines();
           },
 
           async fetchWines(){
-              var data = await fetch(`{% static 'web/wine_list.json' %}`)
-              let wineList = await data.json()
+              if(!!this.search){
+                var data = await fetch(this.nextLink)
+              }else{
+                var data = await fetch(`{% url 'api-wine-list' %}?page=${this.page}`)
+              }
 
-              wineList = [
-              ...wineList[0],
-              ...wineList[1],
-              ...wineList[2],
-              ...wineList[3],
-              ...wineList[4],
-              ...wineList[5],
-              ...wineList[6],
-              ...wineList[7],
-              ...wineList[8],
-              ...wineList[9],
-              ...wineList[10],
-              ...wineList[11],
-              ...wineList[12],
-              ...wineList[13],
-              ...wineList[14],
-              ...wineList[15],
-              ...wineList[16],
-              ...wineList[17],
-              ...wineList[18],
-              ...wineList[19],
-              ...wineList[20],
-              ...wineList[21],
-              ...wineList[22],
-              ...wineList[23],
-              ...wineList[24],
-              ...wineList[25],
-              ...wineList[26],
-            ]
+              let wineResponse = await data.json()
+              
+              this.allWines = wineResponse.data
+              this.nextLink = wineResponse.next
+          },
 
-              this.allWines = wineList
+          async searchWines(){
+            this.page = 1
+            
+            var data = await fetch(`{% url 'api-wine-search' %}?q=${this.search}`)
+            let wineResponse = await data.json()
+
+            this.allWines = wineResponse.data
+            this.nextLink = wineResponse.next
           }
       }
 

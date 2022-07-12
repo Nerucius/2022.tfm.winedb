@@ -43,6 +43,15 @@
     .collection-item:hover{
       background-color: #fafafa;
     }
+
+    li .btn-small{
+      margin: 10px 0;
+      margin-right: 20px;
+    }
+
+    li .row{
+      margin-bottom: 0;
+    }
 </style>
 {% endblock style %}
 
@@ -166,27 +175,35 @@
                     <span v-for="style in selected" class="btn-flat btn-small grey lighten-3">[[ style ]]</span>
                   </div>
                   <br>
-                </div>
-
-                <ul class="collection">
-
                   
-                  <li v-for="wine in recomendedWines" class="collection-item avatar">
-                    <a :href="'{% url 'wine-detail-base' %}' + wine.url">
-                    <img src="{% static 'web/wine-icon.png' %}" class="circle">
-                    <span class="title">[[ wine.nombre ]]</span>
-                    <p style="text-align:xleft">
-                      [[ wine.tipoVino.es ]] 
-                      | [[ wine.subtipoVino != null ? wine.subtipoVino.es : '' ]] 
-                      | [[ wine.zona != null ? wine.zona.nombre : '' ]] <br>
-                      [[ wine.bodega != null ? wine.bodega.nombre : '' ]] <br>
-                      
-                    </p>
-                    </a>
-                    <!-- <a class="secondary-content"><i class="material-icons"></i></a> -->
-                  </li>
+                  <ul class="collection">
 
-                </ul>
+                    <li v-for="wine in recomendedWines" class="collection-item avatar">
+                      <div class="row">
+
+                        <div class="col m6">
+                          <a :href="'{% url 'wine-detail-base' %}' + wine.id">
+                            <img src="{% static 'web/wine-icon.png' %}" class="circle">
+                            <b>[[ wine.name ]]</b>
+                            <p>
+                              [[ wine.zone ]] <br>
+                              [[ wine.cellar_name ]]
+                            </p>
+                          </a>
+                        </div>
+
+                        <div class="col m6">
+                          <span v-for="tag in wine.tags"
+                            class="btn-flat btn-small white lighten-5"
+                            :class="{'burgundy': isSelected(tag), 'white-text': isSelected(tag)}">[[tag]]</span>
+                        </div>
+                      </div>
+
+
+                    </li>
+  
+                  </ul>
+                </div>
 
                 <div class="card-action" style="display:flex; justify-content:space-between">
                 <a
@@ -301,9 +318,11 @@
                 this.selected = [...this.selected, style]
             }
         },
+
         isSelected(style){
             return this.selected.indexOf(style) >= 0
         },
+
         isTypeSelected(){
             for(type of this.wineTypes){
               if(this.selected.indexOf(type) >= 0) return true;
@@ -359,15 +378,20 @@
         },
 
         async getRecomendedWines(){
-          var data = await fetch(`{% static 'web/wine_list.json' %}`)
-          let wineList = await data.json()
+          let data = await fetch(`{% url 'api-wine-ml-recommend-wines' %}?features=${this.selected.join(',')},${this.selectedDO.name}`)
+          let wineResponse = await data.json()
 
-          wineList = [
-          ...wineList[0]
-        ]
+          let similarWinesList = wineResponse.data.map(wine => {
+            return {
+              ...wine,
+              tags: [wine.wine_type, ...wine.style],
+              similar_score: Math.round((wine.similar_score*100))}
+          })
 
-          return wineList.slice(0, 8)
-      },
+          similarWinesList = similarWinesList.sort((a,b) => b.similar_score - a.similar_score)
+
+          return similarWinesList
+        },
 
       }
 
