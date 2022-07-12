@@ -96,15 +96,18 @@ def wine_recommender_similarity(request, wine_id):
     loaded_predictor = pickle.load(file_to_read)
     file_to_read.close()
 
-    # Returns pandas
+    # Returns pandas with wine as index, CS as cosine similarity
     predictions = loaded_predictor.predict(wine_id)
 
-    return HttpResponse(
-        # json.dumps({'response': True, 'request': kwargs}),
-        predictions.to_json(index=True),
-        "application/json",
-    )
+    wines = Wine.objects.filter(pk__in=predictions[:10].index)
+    wines = WineSerializer.serialize(wines)
+    for wine in wines:
+        wine['similar_score'] = predictions.loc[wine['id']].CS
 
+
+    return json_response({
+        "data": anotate_resource_links(wines, request)
+    })
 
 def wine_recommender_style_do(request, *args, **kwargs):
     ml_path = os.path.join(os.path.dirname(__file__), "ml")
@@ -120,20 +123,17 @@ def wine_recommender_style_do(request, *args, **kwargs):
     # Returns pandas
     predictions = loaded_predictor.predict(features)
 
-    return HttpResponse(
-        # json.dumps({'response': True, 'request': kwargs}),
-        predictions.to_json(index=True),
-        "application/json",
-    )
+    wines = Wine.objects.filter(pk__in=predictions[:10].index)
+    wines = WineSerializer.serialize(wines)
+    for wine in wines:
+        wine['similar_score'] = predictions.loc[wine['id']].CS
+
+    return json_response({
+        "data": anotate_resource_links(wines, request)
+    })
 
 
 def predict_do(request, *args, **kwargs):
-    mock_data = {
-        "Priorat  D.O.  Ca.  / D.O.P.": 0.55,
-        "Tarragona  D.O.  / D.O.P.": 0.55,
-        "Catalunya  D.O.  / D.O.P.": 0.55,
-    }
-
     ml_path = os.path.join(os.path.dirname(__file__), "ml")
     sys.path.append(ml_path)
 
