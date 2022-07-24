@@ -12,15 +12,24 @@
       display:none !important;
     }
     dt{
-      font-weight: bold;
       margin-top: 12px;
     }
+    dd{
+      font-weight: bold;
+    }
     #do-map{
-      height: 300px;
+      height: 380px;
     }
     dd .btn-small{
+      font-weight: normal;
       margin: 10px 0;
       margin-right: 20px;
+    }
+    .wine-icon{
+      height: 360px;
+      width: 100%;
+      background-position: center;
+      background-size: cover;
     }
 </style>
 {% endblock style %}
@@ -56,26 +65,50 @@
               </h1>
 
               <div class="row">
+
+                <!-- Left Col -->
                 <div class="col m6 s12">
-                  <dd>
-                    <dt>Pais</dt>
-                    <dd>[[wine.country]]</dd>
-                    <dt>D.O.</dt>
-                    <dd>[[wine.zone]]</dd>
-                    <dt>Any</dt>
-                    <dd>[[wine.year]]</dd>
-                    <dt>Bodega</dt>
-                    <dd>[[wine.cellar_name]]</dd>
-                    <dt>Precio</dt>
-                    <dd>[[wine.price]]€</dd>
-                    <dt>Puntos Peñin&trade;</dt>
-                    <dd>[[wine.penin_points]] /<small>100</small></dd>
-                  </dd>
+                  <!-- Card -->
+                  <div class="card" id="wine-card">
+                    <div class="card-content">
+                      <span class="card-title">Carta del Vino</span>
+                      <div class="row" style="margin:0">
+                        <div class="col s6">
+                          <dd>
+                            <dt>Pais</dt>
+                            <dd>[[wine.country]]</dd>
+                            <dt>D.O.</dt>
+                            <dd>[[wine.zone]]</dd>
+                            <dt>Any</dt>
+                            <dd>[[wine.year]]</dd>
+                            <dt>Bodega</dt>
+                            <dd>[[wine.cellar_name]]</dd>
+                            <dt>Precio</dt>
+                            <dd>[[wine.price]]€</dd>
+                            <dt>Puntos Peñin&trade;</dt>
+                            <dd>[[wine.penin_points]] /<small>100</small></dd>
+                          </dd>
+                        </div>
+                        <div class="col s6">
+                          <div class="wine-icon" :style="{'background-image': 'url('+wineIcon(wine)+')' }" :title="wine.wine_type"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /Card -->
                 </div>
+                <!-- /Left Col -->
+
+                <!-- Right Col -->
                 <div class="col m6 s12">
-                  <div id="do-map"></div>
+                  <div class="card">
+                    <div id="do-map" :style="{'height': wineCardHeight() }"></div>
+                  </div>
                 </div>
+                <!-- /Right Col -->
+
               </div>
+
 
               <h2 class="flow-text">Presentacion del Vino</h2>
 
@@ -202,8 +235,19 @@
             }).addTo(map);
           },
 
-          wineData(wineId){
-            return this.wineList.filter(w => w.url == wineId)[0]
+          wineIcon(wine){
+              if (wine.wine_type_simple == 'tinto') return "{% static 'web/tinto.png' %}";
+              if (wine.wine_type_simple == 'blanco') return "{% static 'web/blanco.png' %}";
+              if (wine.wine_type_simple == 'espumoso') return "{% static 'web/espumoso.png' %}";
+              if (wine.wine_type_simple == 'rosado') return "{% static 'web/rosado.png' %}";
+
+              return "{% static 'web/tinto.png' %}";
+          },
+
+          wineCardHeight(){
+            let el = document.getElementById('wine-card');
+            if(el == null) return '380px'
+            return el.clientHeight + 'px';
           }
       },
 
