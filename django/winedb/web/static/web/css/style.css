@@ -6,6 +6,18 @@
  * Made By MaterializeCSS.com
  */
 
+@media only screen and (min-width: 601px) {
+  .container {
+    width: 95%;
+  }
+}
+
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 80%;
+  }
+}
+
 nav ul a,
 nav .brand-logo {
   color: #444;
@@ -15,7 +27,7 @@ p {
   line-height: 2rem;
 }
 
-.fill-vertical{
+.fill-vertical {
   min-height: Calc(100vh - 253px);
 }
 
@@ -69,6 +81,10 @@ footer.page-footer {
 
 /* Custom Colors */
 
-.burgundy{
+.burgundy {
   background-color: rgb(128, 0, 32) !important;
+}
+
+[v-cloak] {
+  display: none !important;
 }

@@ -8,9 +8,6 @@
     .parallax-container{
         min-height:160px
     }
-    .v-cloack{
-      display:none !important;
-    }
     dt{
       margin-top: 12px;
     }
@@ -31,7 +28,11 @@
       background-position: center;
       background-size: cover;
     }
+    .current-wine{
+      font-weight: bold;
+    }
 </style>
+<link rel="stylesheet" href="{% static 'web/css/neo4jd3.min.css' %}">
 {% endblock style %}
 
 {% block content %}
@@ -47,7 +48,7 @@
 </div>
 
 <div class="container" id="app">
-    <div class="section" class="v-cloack" v-if="wine">
+    <div class="section" v-cloak v-if="wine != null">
 
       <!--
       <div class="row">
@@ -55,116 +56,124 @@
       </div>
       -->
 
-        <!--   Icon Section   -->
-        <div class="row">
+      <!-- Title Card -->
+      <h1 class="center">
+        [[ wine.name ]] <br>
+        <small>——— [[wine.year]] ———</small>
+      </h1>
+
+      <!-- Wine card and DO map -->
+      <div class="row">
+
+        <!-- Wine card -->
+        <div class="col m6 s12">
+          <!-- Card -->
+          <div class="card" id="wine-card">
+            <div class="card-content">
+              <span class="card-title">Carta del Vino</span>
+              <div class="row" style="margin:0">
+                <div class="col s6">
+                  <dd>
+                    <dt>Pais</dt>
+                    <dd>[[wine.country]]</dd>
+                    <dt>D.O.</dt>
+                    <dd>[[wine.zone]]</dd>
+                    <dt>Any</dt>
+                    <dd>[[wine.year]]</dd>
+                    <dt>Bodega</dt>
+                    <dd>[[wine.cellar_name]]</dd>
+                    <dt>Precio</dt>
+                    <dd>[[wine.price]]€</dd>
+                    <dt>Puntos Peñin&trade;</dt>
+                    <dd>[[wine.penin_points]] /<small>100</small></dd>
+                  </dd>
+                </div>
+                <div class="col s6">
+                  <div class="wine-icon" :style="{'background-image': 'url('+wineIcon(wine)+')' }" :title="wine.wine_type"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /Card -->
+        </div>
+        <!-- /Wine card -->
+
+        <!-- DO Map -->
+        <div class="col m6 s12">
+          <div class="card">
+            <div id="do-map" :style="{'height': wineCardHeight() }"></div>
+          </div>
+        </div>
+        <!-- /DO Map -->
+
+      </div>
+
+      <h2 class="flow-text">Presentacion del Vino</h2>
+
+      <div class="row">
+        <div class="col s12">
+          <dd>
+            <dt>Tipologia</dt>
+            <dd>
+              <span class="btn-flat btn-small green lighten-5">[[wine.wine_type]]</span>
+            <dt>Variedades</dt>
+            <dd>
+              <span v-for="el in wine.varieties" class="btn-flat btn-small green lighten-5">[[el]]</span>
+            </dd>
+            <dt>Estilo</dt>
+            <dd>
+              <span v-for="el in wine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
+              <span v-for="el in wine.smell" class="btn-flat btn-small green lighten-5">[[el]]</span>
+              <span v-for="el in wine.mouth" class="btn-flat btn-small green lighten-5">[[el]]</span>
+              <span v-for="el in wine.color" class="btn-flat btn-small green lighten-5">[[el]]</span>
+            </dd>
+          </dd>
+        </div>
+      </div>
+
+
+
+      <div class="row">
+        <div class="col s12">
+
+          <h2 class="flow-text">Otros vinos similares</h2>
+
+          <div class="row">
+            <div class="col s12">
+              <div class="card">
+                <div id="neo4jd3" class="neo4jd3" style="height:400px">
+              </div>
+              </div>
+            </div>
             <div class="col s12">
 
-              <h1 class="center">
-                [[ wine.name ]] <br>
-                <small>——— [[wine.year]] ———</small>
-              </h1>
-
-              <div class="row">
-
-                <!-- Left Col -->
-                <div class="col m6 s12">
-                  <!-- Card -->
-                  <div class="card" id="wine-card">
-                    <div class="card-content">
-                      <span class="card-title">Carta del Vino</span>
-                      <div class="row" style="margin:0">
-                        <div class="col s6">
-                          <dd>
-                            <dt>Pais</dt>
-                            <dd>[[wine.country]]</dd>
-                            <dt>D.O.</dt>
-                            <dd>[[wine.zone]]</dd>
-                            <dt>Any</dt>
-                            <dd>[[wine.year]]</dd>
-                            <dt>Bodega</dt>
-                            <dd>[[wine.cellar_name]]</dd>
-                            <dt>Precio</dt>
-                            <dd>[[wine.price]]€</dd>
-                            <dt>Puntos Peñin&trade;</dt>
-                            <dd>[[wine.penin_points]] /<small>100</small></dd>
-                          </dd>
-                        </div>
-                        <div class="col s6">
-                          <div class="wine-icon" :style="{'background-image': 'url('+wineIcon(wine)+')' }" :title="wine.wine_type"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- /Card -->
-                </div>
-                <!-- /Left Col -->
-
-                <!-- Right Col -->
-                <div class="col m6 s12">
-                  <div class="card">
-                    <div id="do-map" :style="{'height': wineCardHeight() }"></div>
-                  </div>
-                </div>
-                <!-- /Right Col -->
-
-              </div>
-
-
-              <h2 class="flow-text">Presentacion del Vino</h2>
-
-              <div class="row">
-                <div class="col s12">
+              <div class="card" :key="similarWineSelected.id" v-if="similarWineSelected != null">
+                <div class="card-content">
+                  <span class="card-title flow-text">[[ similarWineSelected.name ]]</span>
                   <dd>
-                    <dt>Tipologia</dt>
-                    <dd>
-                      <span class="btn-flat btn-small green lighten-5">[[wine.wine_type]]</span>
-                    <dt>Variedades</dt>
-                    <dd>
-                      <span v-for="el in wine.varieties" class="btn-flat btn-small green lighten-5">[[el]]</span>
-                    </dd>
-                    <dt>Estilo</dt>
-                    <dd>
-                      <span v-for="el in wine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
-                      <span v-for="el in wine.smell" class="btn-flat btn-small green lighten-5">[[el]]</span>
-                      <span v-for="el in wine.mouth" class="btn-flat btn-small green lighten-5">[[el]]</span>
-                      <span v-for="el in wine.color" class="btn-flat btn-small green lighten-5">[[el]]</span>
-                    </dd>
+                    <dt>Pais</dt>
+                    <dd>[[similarWineSelected.country]]</dd>
+                    <dt>D.O.</dt>
+                    <dd>[[similarWineSelected.zone]]</dd>
+                    <dt>Any</dt>
+                    <dd>[[similarWineSelected.year]]</dd>
+                    <dt>Bodega</dt>
+                    <dd>[[similarWineSelected.cellar_name]]</dd>
+                    <dt>Precio</dt>
+                    <dd>[[similarWineSelected.price]]€</dd>
+                    <dt>Puntos Peñin&trade;</dt>
+                    <dd>[[similarWineSelected.penin_points]] /<small>100</small></dd>
                   </dd>
                 </div>
               </div>
 
-              <h2 class="flow-text">Otros vinos similares</h2>
-
-              <table class="highlight">
-                <thead>
-                  <tr>
-                      <th></th>
-                      <th>Vino</th>
-                      <th>DO / Bodega</th>
-                  </tr>
-                </thead>
-        
-                <tbody>
-                  <tr v-for="wine, i in similarWines">
-                    <td>
-                      <b>[[ wine.similar_score ]]%</b>
-                    </td>
-                    <td>
-                      <a :href="'{% url 'wine-detail-base' %}' + wine.id">
-                        [[ wine.name ]] - [[ wine.year ]]
-                      </a><br>
-                      [[ wine.wine_type ]]
-                    </td>
-                    <td>
-                      [[ wine.zone ]]<br>
-                      [[ wine.cellar_name ]]
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
             </div>
+          </div>
+
+
         </div>
+
+      </div>
         
     </div>
 </div>
@@ -172,6 +181,8 @@
 {% endblock content %}
 
 {% block scripts %}
+<script src="{% static 'web/js/d3.min.js' %}"></script>
+<script src="{% static 'web/js/neo4jd3.js' %}"></script>
 
 <script >
  
@@ -186,13 +197,19 @@
           wine: null,
           wineList: null,
           similarWines: [],
+          similarWineSelected: null,
+          graph: null,
+          graphNodeIds: [],
         }
       },
 
       async mounted() {
         console.log(`VUE OK`)
-        await this.fetchWine();
-        await this.fetchSimilarWines();
+        this.wine = await this.fetchWine();
+        this.similarWines = await this.fetchSimilarWines(this.wine);
+        this.similarWineSelected = this.wine
+
+        this.createRecommendedGraph();
         this.createMap();
       },
 
@@ -201,11 +218,11 @@
             var data = await fetch(`{% url 'api-wine-detail-base' %}${this.wineId}/`)
             let wineResponse = await data.json()
             
-            this.wine = wineResponse.data
+            return wineResponse.data
           },
 
-          async fetchSimilarWines(){
-            let data = await fetch(`{% url 'api-wine-ml-base' %}${this.wineId}/similar/`)
+          async fetchSimilarWines(wine){
+            let data = await fetch(`{% url 'api-wine-ml-base' %}${wine.id}/similar/`)
             let wineResponse = await data.json()
 
             let similarWinesList = wineResponse.data.map(wine => {
@@ -216,7 +233,7 @@
 
             similarWinesList = similarWinesList.sort((a,b) => b.similar_score - a.similar_score)
 
-            this.similarWines = similarWinesList
+            return similarWinesList.slice(0, 5)
           },
 
           createMap(){
@@ -235,6 +252,138 @@
             }).addTo(map);
           },
 
+          createRecommendedGraph(){
+            let _vue = this
+
+            this.graph = new Neo4jd3('#neo4jd3', {
+              infoPanel: false,
+              highlight: [
+                {
+                  property: 'current',
+                  value : true,
+                }
+              ],
+              // arrowSize: 4,
+              // icons: this.getGraphIcons(),
+              images: this.getGraphImages(),
+              minCollision: 120,
+              neo4jData: this.createGraphData(this.wine, this.similarWines),
+              //neo4jDataUrl: "{% static 'web/js/example.json' %}",
+              nodeRadius: 40,
+              nodeOutlineColor: 'rgba(128, 0, 32, 0)',
+              nodeOutlineFillColor: 'rgba(128, 0, 32, 0)',
+              
+              onNodeClick(node) {
+                console.log('click on ' + node.id)
+                _vue.similarWineSelected = node.properties.data
+              },
+
+              async onNodeDoubleClick(node){
+                let wineData = node.properties.data
+                let similarWines = (await _vue.fetchSimilarWines(wineData)).slice(0,3)
+                let newData = _vue.createGraphData(wineData, similarWines)
+
+
+                _vue.graph.updateWithNeo4jData(newData)
+                console.log(JSON.stringify(newData))
+              },
+
+              onRelationshipDoubleClick(relationship) {
+                console.log('dclick on ' + JSON.stringify(relationship))
+              },
+              zoomFit: false
+            });
+          },
+
+          createGraphData(centerWine, otherWines){
+            // exclude wines already used
+            otherWines = otherWines.filter(w => this.graphNodeIds.indexOf(w.id) == -1)
+            
+            // Node for similar wines
+            let nodes = otherWines
+              .map(w => ({
+                id: w.id,
+                labels: [w.id],
+                properties: {data: w}
+              }))
+
+            // Append center wine node
+            if(this.graphNodeIds.indexOf(centerWine.id) == -1){
+              nodes = [
+                {
+                  id: centerWine.id,
+                  labels: [centerWine.id],
+                  properties: {current: true, data: centerWine}
+                },
+                ...nodes
+              ]
+            }
+
+            // Create node rels for all wines
+            let relationships = otherWines
+              .map(w => ({
+                id: Math.floor(Math.random()*10000),
+                type: this.getCommonAttrs(w, centerWine, 1),
+                startNode: centerWine.id,
+                endNode: w.id,
+                properties: {}
+            }))
+
+            // Construct final Neo4J data arrangement
+            let neo4jdata = {
+              results: [{
+                data: [{graph: { nodes, relationships }}]
+              }]
+            }
+
+            nodes.forEach(node => this.graphNodeIds = [...this.graphNodeIds, node.id])
+            return neo4jdata;
+          },
+
+          getGraphIcons(){
+            let graphIcons = {}
+            let wineIcon = 'f72f'
+
+            graphIcons[this.wine.id] = wineIcon
+            this.similarWines.forEach( w => {
+              graphIcons[w.id] = wineIcon
+            })
+
+            console.log(graphIcons)
+
+            return graphIcons
+          },
+
+          getGraphImages(){
+            let graphIcons = {}
+            let wineIcon = 'f72f'
+
+            graphIcons[this.wine.id] = this.wineIcon(this.wine)
+            this.similarWines.forEach( w => {
+              graphIcons[w.id] = this.wineIcon(w)
+            })
+
+            console.log(graphIcons)
+
+            return graphIcons
+          },
+
+          getCommonAttrs(a, b, limit=99){
+            let common = [];
+            let aStyles = [...a.style, ...a.mouth, ...a.color, ...a.smell]
+            let bStyles = [...b.style, ...b.mouth, ...b.color, ...b.smell]
+
+            let matches = 1;
+            for(aS of aStyles){
+              if (bStyles.indexOf(aS) >= 0){
+                common = [...common, aS];
+                if (matches++ >= limit) break;
+              }
+            }
+
+            return common.join(', ')
+          },
+
           wineIcon(wine){
               if (wine.wine_type_simple == 'tinto') return "{% static 'web/tinto.png' %}";
               if (wine.wine_type_simple == 'blanco') return "{% static 'web/blanco.png' %}";
@@ -250,7 +399,6 @@
             return el.clientHeight + 'px';
           }
       },
-
 
     }).mount('#app')
 
