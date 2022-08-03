@@ -159,13 +159,13 @@
                                options.onNodeClick(d);
                            }
                        })
-                       .on('dblclick', function(d) {
-                           stickNode(d);
-    
-                           if (typeof options.onNodeDoubleClick === 'function') {
-                               options.onNodeDoubleClick(d);
-                           }
-                       })
+                       // NOTE: Disabled double click
+                       // .on('dblclick', function(d) {
+                       //     stickNode(d);
+                       //     if (typeof options.onNodeDoubleClick === 'function') {
+                       //         options.onNodeDoubleClick(d);
+                       //     }
+                       // })
                        .on('mouseenter', function(d) {
                            if (info) {
                                updateInfo(d);
@@ -489,6 +489,10 @@
         }
     
         function image(d) {
+            if(typeof options.images === 'function'){
+                return options.images(d)
+            }
+
             var i, imagesForLabel, img, imgLevel, label, labelPropertyValue, property, value;
     
             if (options.images) {
@@ -577,6 +581,9 @@
         }
     
         function initImageMap() {
+            // ignore if images is a function
+            if (typeof options.images === "function") return;
+
             var key, keys, selector;
     
             for (key in options.images) {
@@ -1027,7 +1034,8 @@
             size: size,
             updateWithD3Data: updateWithD3Data,
             updateWithNeo4jData: updateWithNeo4jData,
-            version: version
+            version: version,
+            zoomFit: zoomFit,
         };
     }
     

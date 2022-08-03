@@ -123,8 +123,10 @@
             <dt>Estilo</dt>
             <dd>
               <span v-for="el in wine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
+            </dd>
+            <dt>Aroma / Color</dt>
+            <dd>
               <span v-for="el in wine.smell" class="btn-flat btn-small green lighten-5">[[el]]</span>
-              <span v-for="el in wine.mouth" class="btn-flat btn-small green lighten-5">[[el]]</span>
               <span v-for="el in wine.color" class="btn-flat btn-small green lighten-5">[[el]]</span>
             </dd>
           </dd>
@@ -141,7 +143,7 @@
           <div class="row">
             <div class="col s12">
               <div class="card">
-                <div id="neo4jd3" class="neo4jd3" style="height:400px">
+                <div id="neo4jd3" class="neo4jd3" style="height:500px">
               </div>
               </div>
             </div>
@@ -265,37 +267,27 @@
               ],
               // arrowSize: 4,
               // icons: this.getGraphIcons(),
-              images: this.getGraphImages(),
+              images: (n => this.wineIcon(n.properties.data)),
               minCollision: 120,
               neo4jData: this.createGraphData(this.wine, this.similarWines),
               //neo4jDataUrl: "{% static 'web/js/example.json' %}",
               nodeRadius: 40,
               nodeOutlineColor: 'rgba(128, 0, 32, 0)',
               nodeOutlineFillColor: 'rgba(128, 0, 32, 0)',
-              
+              zoomFit: false,
               onNodeClick(node) {
-                console.log('click on ' + node.id)
+                _vue.expandGraphNode(node)
+              },
+              onNodeDoubleClick(node){},
+              onNodeMouseEnter(node){
                 _vue.similarWineSelected = node.properties.data
               },
-
-              async onNodeDoubleClick(node){
-                let wineData = node.properties.data
-                let similarWines = (await _vue.fetchSimilarWines(wineData)).slice(0,3)
-                let newData = _vue.createGraphData(wineData, similarWines)
-
-
-                _vue.graph.updateWithNeo4jData(newData)
-                console.log(JSON.stringify(newData))
-              },
-
-              onRelationshipDoubleClick(relationship) {
-                console.log('dclick on ' + JSON.stringify(relationship))
-              },
-              zoomFit: false
+              onNodeMouseLeave(node){},
+              onRelationshipDoubleClick(relationship){},
             });
           },
 
-          createGraphData(centerWine, otherWines){
+          createGraphData(centerWine, otherWines, centerNode={}){
             // exclude wines already used
             otherWines = otherWines.filter(w => this.graphNodeIds.indexOf(w.id) == -1)
             
@@ -304,7 +296,9 @@
               .map(w => ({
                 id: w.id,
                 labels: [w.id],
-                properties: {data: w}
+                properties: {data: w},
+                x: centerNode.x,
+                y: centerNode.y
               }))
 
             // Append center wine node
@@ -340,6 +334,13 @@
             return neo4jdata;
           },
 
+          async expandGraphNode(node){
+            let wineData = node.properties.data
+            let similarWines = (await this.fetchSimilarWines(wineData)).slice(0,3)
+            let newData = this.createGraphData(wineData, similarWines, node)
+            this.graph.updateWithNeo4jData(newData)
+          },
+
           getGraphIcons(){
             let graphIcons = {}
             let wineIcon = 'f72f'
@@ -348,22 +349,6 @@
             this.similarWines.forEach( w => {
               graphIcons[w.id] = wineIcon
             })
-
-            console.log(graphIcons)
-
-            return graphIcons
-          },
-
-          getGraphImages(){
-            let graphIcons = {}
-            let wineIcon = 'f72f'
-
-            graphIcons[this.wine.id] = this.wineIcon(this.wine)
-            this.similarWines.forEach( w => {
-              graphIcons[w.id] = this.wineIcon(w)
-            })
-
-            console.log(graphIcons)
 
             return graphIcons
           },
@@ -385,6 +370,8 @@
           },
 
           wineIcon(wine){
+              console.log('wineicon')
+              console.log(JSON.stringify(wine))
               if (wine.wine_type_simple == 'tinto') return "{% static 'web/tinto.png' %}";
               if (wine.wine_type_simple == 'blanco') return "{% static 'web/blanco.png' %}";
               if (wine.wine_type_simple == 'espumoso') return "{% static 'web/espumoso.png' %}";
