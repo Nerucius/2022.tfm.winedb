@@ -28,5 +28,7 @@ class Wine(models.Model):
     color = models.TextField(blank=True)
     smell = models.TextField(blank=True)
 
+    axii = models.CharField(max_length=63, blank=True, null=True, default=None)
+
     def __str__(self):
         return f"{self.name} - {self.cellar_name}"

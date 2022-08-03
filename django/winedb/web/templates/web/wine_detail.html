@@ -31,6 +31,20 @@
     .current-wine{
       font-weight: bold;
     }
+
+    .hover-info{
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      width: 33%;
+      height: 100%;
+      margin: 0px;
+
+      border-left: 1.5px solid lightgray;
+      background-color: rgba(255,255,255,0.65);
+      overflow-y: auto;,
+      overflow-x: hidden;
+    }
 </style>
 <link rel="stylesheet" href="{% static 'web/css/neo4jd3.min.css' %}">
 {% endblock style %}
@@ -50,19 +64,14 @@
 <div class="container" id="app">
     <div class="section" v-cloak v-if="wine != null">
 
-      <!--
-      <div class="row">
-        [[wine]]
-      </div>
-      -->
-
-      <!-- Title Card -->
+      <!-- Title -->
       <h1 class="center">
         [[ wine.name ]] <br>
         <small>——— [[wine.year]] ———</small>
       </h1>
 
       <!-- Wine card and DO map -->
+
       <div class="row">
 
         <!-- Wine card -->
@@ -108,75 +117,106 @@
 
       </div>
 
-      <h2 class="flow-text">Presentacion del Vino</h2>
+      <!-- Wine Attributes -->
 
       <div class="row">
         <div class="col s12">
-          <dd>
-            <dt>Tipologia</dt>
-            <dd>
-              <span class="btn-flat btn-small green lighten-5">[[wine.wine_type]]</span>
-            <dt>Variedades</dt>
-            <dd>
-              <span v-for="el in wine.varieties" class="btn-flat btn-small green lighten-5">[[el]]</span>
-            </dd>
-            <dt>Estilo</dt>
-            <dd>
-              <span v-for="el in wine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
-            </dd>
-            <dt>Aroma / Color</dt>
-            <dd>
-              <span v-for="el in wine.smell" class="btn-flat btn-small green lighten-5">[[el]]</span>
-              <span v-for="el in wine.color" class="btn-flat btn-small green lighten-5">[[el]]</span>
-            </dd>
-          </dd>
+
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Aspectos del Vino</span>
+
+                <div class="row">
+                  <div class="col m6 s12">
+                  <dl>
+                    <dt>Tipologia</dt>
+                    <dd>
+                      <span class="btn-flat btn-small green grey lighten-3">[[wine.wine_type]]</span>
+                    <dt>Variedades</dt>
+                    <dd>
+                      <span v-for="el in wine.varieties" class="btn-flat btn-small grey lighten-3">[[el]]</span>
+                    </dd>
+                    <dt>Estilo</dt>
+                    <dd>
+                      <span v-for="el in wine.style" class="btn-flat btn-small grey lighten-3">[[el]]</span>
+                    </dd>
+                    <div v-if="wine.smell.length>0 || wine.color.length>0">
+                      <dt>Aroma / Color</dt>
+                      <dd>
+                        <span v-for="el in wine.smell" class="btn-flat btn-small grey lighten-3">[[el]]</span>
+                        <span v-for="el in wine.color" class="btn-flat btn-small grey lighten-3">[[el]]</span>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+
+              
+                <div class="col m6 s12">
+                  <div id="currentRadar" style="position: relative; top: -50px; height: 340px"></div>
+                </div>
+
+              </div>
+            </div>
+          </div> <!-- /card -->
+
         </div>
       </div>
 
 
 
+      <!-- Recomender Graph -->
+
+
       <div class="row">
         <div class="col s12">
 
-          <h2 class="flow-text">Otros vinos similares</h2>
+          <div class="card">
 
-          <div class="row">
-            <div class="col s12">
-              <div class="card">
-                <div id="neo4jd3" class="neo4jd3" style="height:500px">
-              </div>
-              </div>
-            </div>
-            <div class="col s12">
+            <span class="card-title" style="position: absolute; left:24px; top:24px"> Explora vinos similares</span>
 
-              <div class="card" :key="similarWineSelected.id" v-if="similarWineSelected != null">
+            <Transition name="fade">
+              <div v-if="showHoverInfo || stickHoverInfo" :key="hoverWine.id" class="hover-info">
                 <div class="card-content">
-                  <span class="card-title flow-text">[[ similarWineSelected.name ]]</span>
-                  <dd>
-                    <dt>Pais</dt>
-                    <dd>[[similarWineSelected.country]]</dd>
+                  <span class="card-title flow-text">[[ hoverWine.name ]]</span>
+                  <dl>
+                    <dt>Tipologia</dt>
+                    <dd>[[hoverWine.wine_type]]</dd>
                     <dt>D.O.</dt>
-                    <dd>[[similarWineSelected.zone]]</dd>
-                    <dt>Any</dt>
-                    <dd>[[similarWineSelected.year]]</dd>
-                    <dt>Bodega</dt>
-                    <dd>[[similarWineSelected.cellar_name]]</dd>
-                    <dt>Precio</dt>
-                    <dd>[[similarWineSelected.price]]€</dd>
-                    <dt>Puntos Peñin&trade;</dt>
-                    <dd>[[similarWineSelected.penin_points]] /<small>100</small></dd>
-                  </dd>
+                    <dd>[[hoverWine.zone]]</dd>
+                    <dt v-if="hoverWine.cellar_name">Bodega</dt>
+                    <dd v-if="hoverWine.cellar_name">[[hoverWine.cellar_name]]</dd>
+                    <dt v-if="hoverWine.price">Precio</dt>
+                    <dd v-if="hoverWine.price">[[hoverWine.price]]€</dd>
+                    <dt>Estilo</dt>
+                    <dd>
+                      <span v-for="el in hoverWine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                    </dd>
+                  </dl>
+
+                  <br>
+                  <div class="center" style="width: 100%; position: absolute; bottom: 24px; left: 0px;">
+                    <a class="btn-flat btn burgundy white-text" :href="'{% url 'wine-detail-base' %}' + hoverWine.id" target="_blank">
+                      Ver el vino
+                    </a>
+                  </div>
                 </div>
               </div>
+            </Transition>
 
+            <div id="neo4jd3" class="neo4jd3" style="height:600px"></div>
+
+          </div>
+        </div>
+        <div class="col s12">
+
+          <div class="card" :key="similarWineSelected.id" v-if="similarWineSelected != null">
+            <div class="card-content">
             </div>
           </div>
 
-
         </div>
-
       </div>
-        
+
     </div>
 </div>
 
@@ -187,6 +227,8 @@
 <script src="{% static 'web/js/neo4jd3.js' %}"></script>
 
 <script >
+
+    const RADAR_AXII = ["Afrutado","Heterodoxo","Sabroso","Corpulento","Fresco","Amargo"]
  
     const { createApp } = Vue
 
@@ -202,6 +244,9 @@
           similarWineSelected: null,
           graph: null,
           graphNodeIds: [],
+          hoverWine: null,
+          stickHoverInfo: false,
+          showHoverInfo: false,
         }
       },
 
@@ -213,6 +258,8 @@
 
         this.createRecommendedGraph();
         this.createMap();
+
+        this.createWineRadarplot('currentRadar', this.wine);
       },
 
       methods:{
@@ -239,8 +286,6 @@
           },
 
           createMap(){
-            console.log('createMap');
-  
             var map = L.map('do-map',{
               center: [0,0],
               dragging: false,
@@ -275,14 +320,10 @@
               nodeOutlineColor: 'rgba(128, 0, 32, 0)',
               nodeOutlineFillColor: 'rgba(128, 0, 32, 0)',
               zoomFit: false,
-              onNodeClick(node) {
-                _vue.expandGraphNode(node)
-              },
               onNodeDoubleClick(node){},
-              onNodeMouseEnter(node){
-                _vue.similarWineSelected = node.properties.data
-              },
-              onNodeMouseLeave(node){},
+              onNodeClick: this.clickWineNode,
+              onNodeMouseEnter: this.hoverWineNodeEnter,
+              onNodeMouseLeave: this.hoverWineNodeExit,
               onRelationshipDoubleClick(relationship){},
             });
           },
@@ -341,6 +382,22 @@
             this.graph.updateWithNeo4jData(newData)
           },
 
+          clickWineNode(node) {
+            this.expandGraphNode(node)
+            this.similarWineSelected = node.properties.data
+            this.stickHoverInfo = true
+          },
+
+          hoverWineNodeEnter(node){
+            this.showHoverInfo = true
+            // this.stickHoverInfo = false
+            this.hoverWine = node.properties.data
+          },
+
+          hoverWineNodeExit(){
+            this.showHoverInfo = false
+          },
+
           getGraphIcons(){
             let graphIcons = {}
             let wineIcon = 'f72f'
@@ -369,9 +426,28 @@
             return common.join(', ')
           },
 
+          createWineRadarplot(selector, wine){
+            data = [{
+              type: 'scatterpolar',
+              r: wine.axii.split(',').map(parseFloat),
+              theta: RADAR_AXII,
+              fill: 'toself',
+              marker: {
+                color: 'rgb(128, 0, 32)'
+              }
+            }]
+            
+            layout = {
+              autosize: true,
+              height:425,
+              title: 'Atributos AXII',
+              polar: {radialaxis: {visible: false, range: [0, 1]}},
+            }
+            
+            Plotly.newPlot(selector, data, layout)
+          },
+
           wineIcon(wine){
-              console.log('wineicon')
-              console.log(JSON.stringify(wine))
               if (wine.wine_type_simple == 'tinto') return "{% static 'web/tinto.png' %}";
               if (wine.wine_type_simple == 'blanco') return "{% static 'web/blanco.png' %}";
               if (wine.wine_type_simple == 'espumoso') return "{% static 'web/espumoso.png' %}";
