@@ -462,12 +462,14 @@
           },
 
           wineIcon(wine){
-              if (wine.wine_type_simple == 'tinto') return "{% static 'web/tinto.png' %}";
-              if (wine.wine_type_simple == 'blanco') return "{% static 'web/blanco.png' %}";
-              if (wine.wine_type_simple == 'espumoso') return "{% static 'web/espumoso.png' %}";
-              if (wine.wine_type_simple == 'rosado') return "{% static 'web/rosado.png' %}";
+            let wt = wine.wine_type_simple.toLowerCase()
+            
+            if (wt == 'tinto') return "{% static 'web/tinto.png' %}";
+            if (wt == 'blanco') return "{% static 'web/blanco.png' %}";
+            if (wt == 'espumoso') return "{% static 'web/espumoso.png' %}";
+            if (wt == 'rosado') return "{% static 'web/rosado.png' %}";
 
-              return "{% static 'web/tinto.png' %}";
+            return "{% static 'web/tinto.png' %}";
           },
 
           wineCardHeight(){
