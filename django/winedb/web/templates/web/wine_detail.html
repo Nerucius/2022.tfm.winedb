@@ -37,6 +37,7 @@
       top: 0px;
       right: 0px;
       width: 33%;
+      /* min-width: 300px; */
       height: 100%;
       margin: 0px;
 
@@ -194,9 +195,9 @@
                   </dl>
 
                   <br>
-                  <div class="center" style="width: 100%; position: absolute; bottom: 24px; left: 0px;">
+                  <div v-if="hoverWine.id != wine.id" class="center" style="width: 100%; position: absolute; bottom: 28px; left: 0px;">
                     <a class="btn-flat btn burgundy white-text" :href="'{% url 'wine-detail-base' %}' + hoverWine.id" target="_blank">
-                      Ver el vino
+                      Abrir carta del Vino
                     </a>
                   </div>
                 </div>
@@ -358,7 +359,7 @@
             let relationships = otherWines
               .map(w => ({
                 id: Math.floor(Math.random()*10000),
-                type: this.getCommonAttrs(w, centerWine, 1),
+                type: this.getRelationStyle(centerWine, w, 1),
                 startNode: centerWine.id,
                 endNode: w.id,
                 properties: {}
@@ -410,16 +411,23 @@
             return graphIcons
           },
 
-          getCommonAttrs(a, b, limit=99){
+          getRelationStyle(a, b, limit=99){
             let common = [];
-            let aStyles = [...a.style, ...a.mouth, ...a.color, ...a.smell]
-            let bStyles = [...b.style, ...b.mouth, ...b.color, ...b.smell]
+            let aStyles = [...a.style, ...a.color, ...a.smell]
+            let bStyles = [...b.style, ...b.color, ...b.smell]
 
-            let matches = 1;
+            // Find styles that B has that A doesn't
+            for(bS of bStyles){
+              if (aStyles.indexOf(bS) == -1){
+                return bS;
+              }
+            }
+
+            // Find common ground betwen A and B
             for(aS of aStyles){
               if (bStyles.indexOf(aS) >= 0){
                 common = [...common, aS];
-                if (matches++ >= limit) break;
+                if (common.length >= limit) break;
               }
             }
 
@@ -443,8 +451,14 @@
               title: 'Atributos AXII',
               polar: {radialaxis: {visible: false, range: [0, 1]}},
             }
+
+            config = {
+              staticPlot: true,
+              displayModeBar: false,
+              responsive: true
+            }
             
-            Plotly.newPlot(selector, data, layout)
+            Plotly.newPlot(selector, data, layout, config)
           },
 
           wineIcon(wine){
