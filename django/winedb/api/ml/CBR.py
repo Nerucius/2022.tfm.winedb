@@ -46,13 +46,13 @@ class CBRDO:
                 wine_vector[i] = 1
             
             i += 1
+
         
         # Calculating cosine similarity
-        # TODO we could calculate it in other ways
         num_similarity_vector = self.all_wine_data.values @ wine_vector.T
-        den_similarity_vector = np.linalg.norm(self.all_wine_data.values, axis=1) * np.linalg.norm(wine_vector)
+        den_similarity_vector = np.sum(np.linalg.norm(self.all_wine_data.values, axis=1) * np.linalg.norm(wine_vector))
         
-        similarity = num_similarity_vector / den_similarity_vector
+        similarity = num_similarity_vector  / den_similarity_vector
         
         # Construct DataFrame for returning data consistency to the front end
 
@@ -61,7 +61,4 @@ class CBRDO:
         most_similar_wines = most_similar_wines.sort_values(by="CS",ascending=False)
         return most_similar_wines
 
-        most_similar_ids = np.flip(np.argsort(similarity,))
-
-        return self.represented_items.id[most_similar_ids]
 

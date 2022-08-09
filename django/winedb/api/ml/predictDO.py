@@ -15,7 +15,9 @@ class multiple_CatBoostClassifier(CatBoostClassifier):
         ordered_list = np.zeros(len(self.feature_names_))
         i=0
         for feature in self.feature_names_:
-            if feature in X: ordered_list[i] = 1
+            if feature in X: 
+                ordered_list[i] = 1
+            
             i += 1
 
         

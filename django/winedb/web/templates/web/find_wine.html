@@ -253,49 +253,38 @@
               'espumoso',
             ],
             wineStyles:[
+              'corpulento',
               'sabroso',
-              'especiado',
               'frutal',
               'equilibrado',
-              'maduro',
-              'herbal',
               'cítrico',
-              'fresco',
-              'floral',
-              'correcto',
-              'tostado',
-              'aromático',
-              'taninos',
-              'burbuja fina',
+              'especiado',
               'suave',
+              'herbal',
               'persistente',
-              'corpulento',
-              'notas de levadura',
-              'balsámico',
-              'silvestre',
-              'dulce',
-              'elegante',
-              'cálido',
-              'oxidado',
-              'con vejez',
-              'tropical',
+              'floral',
+              'fresco',
+              'tostado',
+              'correcto',
               'amargo',
-              'varietal',
-              'ligera reducción',
-              'clásico',
+              'aromático',
+              'dulce',
+              'notas de levadura',
+              'oxidado',
+              'silvestre',
+              'balsámico',
+              // 'con defectos',
+              'taninos',
+              'elegante',
+              'con vejez',
+              'cálido',
               'mineral',
-              'rústico',
-              'cremoso',
+              'tropical',
+              'varietal',
+              'clásico',
               'carnoso',
-              'concentrado',
-              'original',
-              'crianza clásica',
-              'reducido',
-              'representativo',
-              'con personalidad',
-              'matices de solera',
-              'espirituoso',
-              'con defectos'
+              'cremoso',
+              'rústico',
             ],
             selected: [],
             recomendedDOs: null,
@@ -306,6 +295,8 @@
 
       async mounted() {
         console.log(`VUE OK`)
+
+        this.wineStyles = this.wineStyles.sort()
       },
 
       methods:{
@@ -334,7 +325,7 @@
         },
 
         isSelected(style){
-            return this.selected.indexOf(style) >= 0
+            return this.selected.indexOf(style.toLowerCase()) >= 0
         },
 
         isTypeSelected(){
@@ -398,7 +389,7 @@
           let similarWinesList = wineResponse.data.map(wine => {
             return {
               ...wine,
-              tags: [wine.wine_type, ...wine.style],
+              tags: [wine.wine_type_simple, ...wine.style],
               similar_score: Math.round((wine.similar_score*100))}
           })
 

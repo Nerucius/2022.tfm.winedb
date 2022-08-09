@@ -176,7 +176,7 @@
             <span class="card-title" style="position: absolute; left:24px; top:24px"> Explora vinos similares</span>
 
             <Transition name="fade">
-              <div v-if="showHoverInfo || stickHoverInfo" :key="hoverWine.id" class="hover-info">
+              <div v-if="hoverWine != null | showHoverInfo || stickHoverInfo" :key="hoverWine.id" class="hover-info">
                 <div class="card-content">
                   <span class="card-title flow-text">[[ hoverWine.name ]]</span>
                   <dl>
@@ -190,7 +190,7 @@
                     <dd v-if="hoverWine.price">[[hoverWine.price]]€</dd>
                     <dt>Estilo</dt>
                     <dd>
-                      <span v-for="el in hoverWine.style" class="btn-flat btn-small green lighten-5">[[el]]</span>
+                      <span v-for="el in hoverWine.style" class="btn-flat btn-small grey lighten-3">[[el]]</span>
                     </dd>
                   </dl>
 
@@ -229,7 +229,7 @@
 
 <script >
 
-    const RADAR_AXII = ["Afrutado","Heterodoxo","Sabroso","Corpulento","Fresco","Amargo"]
+    const RADAR_AXII = ["Equilibrado","Dulzura","Potencia","Citrico","Sabrosidad"]
  
     const { createApp } = Vue
 
