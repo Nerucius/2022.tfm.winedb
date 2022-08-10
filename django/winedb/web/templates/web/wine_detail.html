@@ -5,6 +5,18 @@
 
 {% block style %}
 <style>
+    .title-bar{
+      height: 45px;
+      margin: 0 20%;
+      border: 0;
+      border-bottom: 3px solid black;
+      margin-bottom: 40px;
+    }
+    .small-title{
+      background-color: white;
+      padding: 0 20px;
+    }
+
     .parallax-container{
         min-height:160px
     }
@@ -28,6 +40,11 @@
       background-position: center;
       background-size: cover;
     }
+    .wine-icon.small{
+      height: 240px;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
     .current-wine{
       font-weight: bold;
     }
@@ -43,7 +60,7 @@
 
       border-left: 1.5px solid lightgray;
       background-color: rgba(255,255,255,0.65);
-      overflow-y: auto;,
+      overflow-y: auto;
       overflow-x: hidden;
     }
 </style>
@@ -68,7 +85,9 @@
       <!-- Title -->
       <h1 class="center">
         [[ wine.name ]] <br>
-        <small>——— [[wine.year]] ———</small>
+        <div class="title-bar center">
+          <small class="small-title">[[wine.year]]</small>
+        </div>
       </h1>
 
       <!-- Wine card and DO map -->
@@ -153,7 +172,7 @@
 
               
                 <div class="col m6 s12">
-                  <div id="currentRadar" style="position: relative; top: -50px; height: 340px"></div>
+                  <div id="currentRadar" style="position: relative; top: -40px; height: 340px"></div>
                 </div>
 
               </div>
@@ -163,10 +182,7 @@
         </div>
       </div>
 
-
-
       <!-- Recomender Graph -->
-
 
       <div class="row">
         <div class="col s12">
@@ -208,13 +224,56 @@
 
           </div>
         </div>
+      </div>
+
+      <!-- Recomender Listings -->
+
+      <div class="row">
         <div class="col s12">
-
-          <div class="card" :key="similarWineSelected.id" v-if="similarWineSelected != null">
-            <div class="card-content">
+          <Transition name="fade">
+            <div class="card" :key="expandedWine.id" v-if="expandedWine != null">
+              <div class="card-content">
+  
+                <h4 style="margin: 0;">
+                  Vinos similares a "[[ expandedWine.name ]]"
+                </h4>
+                <br>
+  
+                <div v-for="wine in expandedWineRecomended">
+                  <span class="card-title">[[ wine.name ]]</span>
+                  <div class="row">
+                    <div class="col m4 s6">
+                      <dl>
+                        <dt>Tipologia</dt>
+                        <dd>[[wine.wine_type]]</dd>
+                        <dt>D.O.</dt>
+                        <dd>[[wine.zone]]</dd>
+                        <dt v-if="wine.cellar_name">Bodega</dt>
+                        <dd v-if="wine.cellar_name">[[wine.cellar_name]]</dd>
+                        <dt v-if="wine.price">Precio</dt>
+                        <dd v-if="wine.price">[[wine.price]]€</dd>
+                      </dl>
+                      <div class="center">
+                        <a class="btn-flat btn burgundy white-text" :href="'{% url 'wine-detail-base' %}' + wine.id" target="_blank">
+                          Abrir carta del Vino
+                        </a>
+                      </div>
+                    </div>
+                    <div class="col m3 s6">
+                      <div class="wine-icon small" :style="{'background-image': 'url('+wineIcon(wine)+')' }" :title="wine.wine_type"></div>
+                    </div>
+                    <div class="col m5 s12">
+                      <div :id="'radar-compare-'+wine.id"
+                        style="position: relative; top:-60px; height:250px;"></div>
+                    </div>
+                  </div>
+  
+                  <hr style="margin: 20px -25px; border: 0; border-bottom: 1px solid lightgrey">
+                </div>
+  
+              </div>
             </div>
-          </div>
-
+          </Transition>
         </div>
       </div>
 
@@ -248,6 +307,8 @@
           hoverWine: null,
           stickHoverInfo: false,
           showHoverInfo: false,
+          expandedWine: null,
+          expandedWineRecomended: []
         }
       },
 
@@ -259,6 +320,7 @@
 
         this.createRecommendedGraph();
         this.createMap();
+        this.setExpandedWineAndRecs(this.wine, this.similarWines);
 
         this.createWineRadarplot('currentRadar', this.wine);
       },
@@ -329,6 +391,16 @@
             });
           },
 
+          setExpandedWineAndRecs(wine, recWines){
+            this.expandedWine = wine;
+            this.expandedWineRecomended = recWines;
+            setTimeout(() =>{
+              for(rw of recWines){
+                this.createWineRadarplot(`radar-compare-${rw.id}`, rw, wine, 330)
+              }
+            }, 300)
+          },
+
           createGraphData(centerWine, otherWines, centerNode={}){
             // exclude wines already used
             otherWines = otherWines.filter(w => this.graphNodeIds.indexOf(w.id) == -1)
@@ -381,6 +453,8 @@
             let similarWines = (await this.fetchSimilarWines(wineData)).slice(0,3)
             let newData = this.createGraphData(wineData, similarWines, node)
             this.graph.updateWithNeo4jData(newData)
+
+            this.setExpandedWineAndRecs(wineData, similarWines);
           },
 
           clickWineNode(node) {
@@ -434,26 +508,46 @@
             return common.join(', ')
           },
 
-          createWineRadarplot(selector, wine){
-            data = [{
+          createWineRadarplot(selector, wine, compared=null, height=425){
+            data = []
+
+            if(!!compared){
+              data.push({
+                type: 'scatterpolar',
+                r: compared.axii.split(',').map(parseFloat),
+                theta: RADAR_AXII,
+                fill: 'toself',
+                marker: {
+                  color: '#AAA'
+                },
+                name: compared.name
+              })
+            }
+
+            data.push({
               type: 'scatterpolar',
               r: wine.axii.split(',').map(parseFloat),
               theta: RADAR_AXII,
               fill: 'toself',
               marker: {
                 color: 'rgb(128, 0, 32)'
-              }
-            }]
+              },
+              name: wine.name
+            })
+
             
             layout = {
+              showlegend: false,
               autosize: true,
-              height:425,
+              height: height,
               title: 'Atributos AXII',
-              polar: {radialaxis: {visible: false, range: [0, 1]}},
+              polar: {radialaxis: {visible: false,
+                // range: [0, 1]
+              }},
             }
 
             config = {
-              staticPlot: true,
+              staticPlot: false,
               displayModeBar: false,
               responsive: true
             }

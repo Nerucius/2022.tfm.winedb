@@ -298,7 +298,6 @@
                 .attr('text-anchor', 'middle')
                 .attr('y', '60px')
                 .html(function(d) {
-                console.log(d.properties.data.name)
                     return d.properties.data.name;
                 })
                 .call(wrap, 180)
