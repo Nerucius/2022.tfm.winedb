@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="input-field col s12 m6">
-                  <select multiple name="search_types" v-model="searchTypes">
+                  <select multiple name="search_types" v-model="searchTypes" @change="page = 1">
                     <option value="Tinto">Tinto</option>
                     <option value="Blanco">Blanco</option>
                     <option value="Rosado">Rosado</option>
@@ -65,7 +65,7 @@
               <br>
 
 
-              <table class="highlight">
+              <table v-if="!noWinesFound" class="highlight">
                 <thead>
                   <tr>
                       <th>Vino</th>
@@ -88,6 +88,10 @@
                   </tr>
                 </tbody>
               </table>
+
+              <div v-else class="center">
+                <h4>Lo sentimos, no se han encontrado vinos con esa busqueda</h4>
+              </div>
 
               <br>
               <br>
@@ -143,7 +147,9 @@
         // Init pagination
         this.page = 1
         this.fetchedPage = 0
-        this.fetchNextPage();
+
+        // Create debounced method
+        this.searchWines = _.debounce(async () => this._searchWines(), 350)
       },
 
       computed: {
@@ -157,12 +163,18 @@
             wineList = wineList.filter(w => this.searchTypes.indexOf(w.wine_type_simple) >=0 )
           }
 
-          if (wineList.length-1 < maxWineIndex){
+          if (wineList.length-1 < maxWineIndex && !this.isEndOfPagination()){
             this.fetchNextPage();
             return LOADING_WINES;
           }
 
           return wineList.slice((this.page-1)*this.pageSize, this.page*this.pageSize)
+        },
+
+        noWinesFound(){
+          let filteredWinesEmpty = this.wines.length > 0 && this.wines[0].name == 'Loading...'
+          let noWines = this.allWines.length == 0
+          return this.nextLink == null && (filteredWinesEmpty || noWines)
         }
       },
 
@@ -180,10 +192,14 @@
 
           async fetchNextPage(){
             let nextPageLink;
+            let nextPage;
+            if(!!this.search & !this.nextLink){
+              return
+            }
             if(!!this.nextLink){
               nextPageLink = this.nextLink
             }else{
-              let nextPage = this.fetchedPage+1;
+              nextPage = this.fetchedPage+1;
               nextPageLink = `{% url 'api-wine-list' %}?page=${nextPage}`
             }
             
@@ -198,7 +214,7 @@
             this.fetchedPage = nextPage
           },
 
-          async searchWines(){
+          async _searchWines(){
             if(!!this.search){
               // If search term not empty, load first search page
               this.page = 1
@@ -217,7 +233,20 @@
               this.allWines = []
               this.fetchNextPage();
             }
-          }
+          },
+      
+          isSearch(){
+            return !!this.search;
+          },
+
+          isEndOfPagination(){
+            return this.page == this.fetchedPage && this.nextLink == null;
+          },
+          
+          isEndOfSearch(){
+            return this.isSearch() && this.isEndOfPagination();
+          },
+
       }
 
     }).mount('#app')
