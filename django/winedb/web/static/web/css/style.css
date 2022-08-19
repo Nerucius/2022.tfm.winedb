@@ -79,10 +79,18 @@ footer.page-footer {
   margin: 0;
 }
 
+.justify-text{
+  text-align: justify !important;
+}
+
 /* Custom Colors */
 
 .burgundy {
   background-color: rgb(128, 0, 32) !important;
+}
+
+.burgundy-text {
+  color: rgb(128, 0, 32) !important;
 }
 
 [v-cloak] {
