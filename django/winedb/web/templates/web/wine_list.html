@@ -20,9 +20,9 @@
     <div class="section">
 
       <div class="container">
-        <h1 class="header center white-text">All Wines</h1>
+        <h1 class="header center white-text">Todos los Vinos</h1>
         <div class="row center">
-          <h5 class="header col s12 light">List of all wines here</h5>
+          <h5 class="header col s12 light">Lista y busca todos los vinos que tenemos</h5>
         </div>
       </div>
 
@@ -38,51 +38,68 @@
             <div class="col s12">
 
               <div class="row">
-                <div class="col s12 m6">
+
+                <div class="input-field col s12 m6">
+                  <label for="search">Buscar por Nombre, DO, Bodega</label>
+                  <input type="text" name="search" v-model="search" @keyup="searchWines">
                 </div>
-                <div class="col s12 m6">
-                  <label for="search">Search Wine</label>
-                  <input type="text" name="search" v-model="search" @blur="searchWines">
+
+                <div class="input-field col s12 m6">
+                  <select multiple name="search_types" v-model="searchTypes">
+                    <option value="Tinto">Tinto</option>
+                    <option value="Blanco">Blanco</option>
+                    <option value="Rosado">Rosado</option>
+                    <option value="Espumoso">Espumoso</option>
+                  </select>
+                  <label for="search_types">Tipologias</label>
                 </div>
               </div>
 
-
-                  <table class="highlight">
-                    <thead>
-                      <tr>
-                          <th>Nom</th>
-                          <th>Tipologia</th>
-                          <th>D.O.</th>
-                      </tr>
-                    </thead>
-            
-                    <tbody>
-                      <tr v-for="wine in wines">
-                        <td>
-                          <a :href="'{% url 'wine-detail-base' %}' + wine.id">
-                            [[ wine.name ]]
-                          </a>
-                        </td>
-                        <td>[[ wine.wine_type_simple ]]</td>
-                        <td>[[ wine.zone ]]</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <br>
-                  <br>
-
-                  <div class="center">
-                    <button @click="prevPage" :disabled="page == 1" class="btn burgundy">&lt;</button>
-                    &nbsp;&nbsp;
-                    <button disabled class="btn btn-flat">[[ page ]]</button>
-                    &nbsp;&nbsp;
-                    <button :disabled="nextLink == null" @click="nextPage" class="btn burgundy">&gt;</button>
-                  </div>
-
-                  <br>
+              <div class="center">
+                <button @click="prevPage" :disabled="page == 1" class="btn burgundy">&lt;</button>
+                &nbsp;&nbsp;
+                <button disabled class="btn btn-flat">[[ page ]]</button>
+                &nbsp;&nbsp;
+                <button :disabled="nextLink == null" @click="nextPage" class="btn burgundy">&gt;</button>
+              </div>
+              <br>
 
 
+              <table class="highlight">
+                <thead>
+                  <tr>
+                      <th>Vino</th>
+                      <th>Tipologia</th>
+                      <th>Bodega</th>
+                      <th>D.O.</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  <tr v-for="wine in wines">
+                    <td>
+                      <a :href="'{% url 'wine-detail-base' %}' + wine.id">
+                        [[ wine.name ]]
+                      </a>
+                    </td>
+                    <td>[[ wine.wine_type_simple ]]</td>
+                    <td>[[ wine.cellar_name ]]</td>
+                    <td>[[ wine.zone ]]</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <br>
+              <br>
+
+              <div class="center">
+                <button @click="prevPage" :disabled="page == 1" class="btn burgundy">&lt;</button>
+                &nbsp;&nbsp;
+                <button disabled class="btn btn-flat">[[ page ]]</button>
+                &nbsp;&nbsp;
+                <button :disabled="nextLink == null" @click="nextPage" class="btn burgundy">&gt;</button>
+              </div>
+              <br>
 
             </div>
         </div>
@@ -98,70 +115,108 @@
 
     const { createApp } = Vue
 
+    const PAGESIZE = 20;
+    const LOADING_WINES = new Array(PAGESIZE).fill({name:'Loading...'}).flat();
+
     createApp({
       delimiters: ['[[', ']]'],
 
       data() {
         return {
-          search: '',
+          // wine data
           allWines: [],
-          start: 0,
-          end: 15,
-          page: 1,
+          // pagination
+          pageSize: PAGESIZE,
+          page: null,
+          fetchedPage: null,
           nextLink: null,
+          // search
+          search: '',
+          searchTypes: [],
         }
       },
 
       mounted() {
         console.log(`VUE OK`)
-        this.fetchWines();
+        $('select').formSelect();
+        
+        // Init pagination
+        this.page = 1
+        this.fetchedPage = 0
+        this.fetchNextPage();
       },
 
       computed: {
         wines(){
-          // let wineList = this.allWines;
-          // if(this.search.length != 0){
-          //   wineList = wineList.filter(w => w.nombre.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)
-          // }
-          // return wineList.slice(this.start, this.end)
+          console.log("compute wine list")
 
-          return this.allWines
+          let maxWineIndex = this.page * this.pageSize - 1;
+          let wineList = [...this.allWines];
+
+          if (this.searchTypes.length > 0){
+            wineList = wineList.filter(w => this.searchTypes.indexOf(w.wine_type_simple) >=0 )
+          }
+
+          if (wineList.length-1 < maxWineIndex){
+            this.fetchNextPage();
+            return LOADING_WINES;
+          }
+
+          return wineList.slice((this.page-1)*this.pageSize, this.page*this.pageSize)
         }
       },
 
       methods:{
           nextPage(){
             this.page += 1
-            this.fetchWines();
+            // this.fetchWines();
           },
           
           prevPage(){
             if(this.page <= 1) return;
             this.page -= 1
-            this.fetchWines();
+            // this.fetchWines();
           },
 
-          async fetchWines(){
-              if(!!this.search){
-                var data = await fetch(this.nextLink)
-              }else{
-                var data = await fetch(`{% url 'api-wine-list' %}?page=${this.page}`)
-              }
+          async fetchNextPage(){
+            let nextPageLink;
+            if(!!this.nextLink){
+              nextPageLink = this.nextLink
+            }else{
+              let nextPage = this.fetchedPage+1;
+              nextPageLink = `{% url 'api-wine-list' %}?page=${nextPage}`
+            }
+            
+            var data = await fetch(nextPageLink)
 
-              let wineResponse = await data.json()
-              
-              this.allWines = wineResponse.data
-              this.nextLink = wineResponse.next
+            // Get the data and save to allWiens
+            let wineResponse = await data.json()
+            this.allWines = [...this.allWines, ...wineResponse.data]
+            this.nextLink = wineResponse.next
+
+            // Update last fetched page
+            this.fetchedPage = nextPage
           },
 
           async searchWines(){
-            this.page = 1
-            
-            var data = await fetch(`{% url 'api-wine-search' %}?q=${this.search}`)
-            let wineResponse = await data.json()
+            if(!!this.search){
+              // If search term not empty, load first search page
+              this.page = 1
+              this.fetchedPage = 1
+  
+              let data = await fetch(`{% url 'api-wine-search' %}?q=${this.search}`)
+              let wineResponse = await data.json()
 
-            this.allWines = wineResponse.data
-            this.nextLink = wineResponse.next
+              this.allWines = wineResponse.data
+              this.nextLink = wineResponse.next
+            
+            }else{
+              // If search term empty, reinit normal pagination
+              this.page = 1
+              this.fetchedPage = 0
+              this.allWines = []
+              this.fetchNextPage();
+            }
           }
       }
 
