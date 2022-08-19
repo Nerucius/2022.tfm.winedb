@@ -60,9 +60,9 @@
   <div id="index-banner" class="parallax-container">
     <div class="section no-pad">
       <div class="container">
-        <h1 class="header center white-text">Troba el teu Vi perfecte</h1>
+        <h1 class="header center white-text">Encuentra el vino perfecto</h1>
         <div class="row center">
-          <h5 class="header col s12 light">No saps exactament el que estas buscant? deixet guiar per el nostre trobador de vins.</h5>
+          <h5 class="header col s12 light">No sabes exactamente que vino estas buscando? Dejate guiar por nuestro analizador de gustos y encuentra nuevos vinos que no conocias.</h5>
         </div>
         <br><br>
 
@@ -77,12 +77,11 @@
       <div class="row">
         <div class="col s12 center">
 
-
             <div class="card">
                 <!-- Page 1 - Estilos -->
                 <div class="card-content" key="page1" v-if="page == 'page1'">
                   <!-- Wine Type -->
-                  <span class="card-title">Selecciona opcionalment el tipus de Vi:</span>
+                  <span class="card-title">Selecciona opcionalment el tipo de Vino:</span>
                   <br>
                   <div class="button-flex">
                     <template v-for="style in wineTypes" :key="style">
@@ -108,7 +107,7 @@
                   <br>
 
                   <!-- Wine Styles -->
-                  <span class="card-title">Selecciona els sabors o estils que estiguis buscant:</span>
+                  <span class="card-title">Selecciona los estilos que te vengan más de gusto:</span>
                   <br>
                   <div class="button-flex">
                     <template v-for="style in wineStyles" :key="style">
@@ -207,15 +206,17 @@
 
                 <div class="card-action" style="display:flex; justify-content:space-between">
                 <a
+                  v-if="page != 'page1'"
                   @click="prevPage(page)"
                   class="btn waves-effect waves-ligh burgundy"
-                  >Previa</a>
+                  >Volver</a>
                 &nbsp; &nbsp;
                 <a
+                  v-if="page != 'page3'"
                   @click="nextPage(page)"
                   class="btn waves-effect waves-ligh burgundy"
                   :class="{'disabled': selected.length == 0}"
-                  >Seguent</a>
+                  >Siguiente</a>
                 </div>
 
               </div>

@@ -42,6 +42,8 @@
     }
     .wine-icon.small{
       height: 240px;
+      width: 200px;
+      margin: auto;
       background-size: cover;
       background-repeat: no-repeat;
     }
@@ -549,7 +551,7 @@
             config = {
               staticPlot: false,
               displayModeBar: false,
-              responsive: true
+              responsive: false
             }
             
             Plotly.newPlot(selector, data, layout, config)
