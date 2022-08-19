@@ -5,19 +5,13 @@
 
 {% block content %}
 
-  <div id="index-banner" class="parallax-container">
-    <div class="section no-pad-bot">
+  <div id="index-banner" class="parallax-container" style="min-height: auto">
+    <div class="section">
       <div class="container">
-        <br><br>
-        <h1 class="header center white-text">Wine Database</h1>
+        <h1 class="header center white-text">Explorador de Vinos de Catalunya</h1>
         <div class="row center">
-          <h5 class="header col s12 light">Explore and find Wines that you Love</h5>
+          <h5 class="header col s12 light">Encuentra tu siguiente copa!</h5>
         </div>
-        <div class="row center">
-          <a href="#" id="download-button" class="btn-large waves-effect waves-light red darken-4">Get Started</a>
-        </div>
-        <br><br>
-
       </div>
     </div>
     <div class="parallax"><img src="{% static 'web/background4.jpg' %}" alt="Unsplashed background img 1"></div>
@@ -28,43 +22,43 @@
 
       <!--   Icon Section   -->
       <div class="row">
-        <div class="col s12 m4">
+        <div class="col s12 m6">
           <div class="icon-block">
-            <h2 class="center red-text text-darken-4"><i class="material-icons">flash_on</i></h2>
-            <h5 class="center">Lorem Ipsum</h5>
-
-            <p class="light">We did most of the heavy lifting for you to provide a default stylings that incorporate our custom components. Additionally, we refined animations and transitions to provide a smoother experience for developers.</p>
+            <h2 class="center burgundy-text"><i class="fa-solid fa-wine-bottle"></i></h2>
+            <h5 class="center">Encuentra tu vino perfecto</h5>
+            <p class="">
+              Si no sabes por donde empezar, prueba nuestro buscador de vinos a partir de tu tipo y estilo preferido.
+            </p>
+            <br>
+            <div class="center">
+              <a href="{% url 'find-wine' %}" class="btn waves-effect waves-light burgundy">Encuentra un Vino</a>
+            </div>
           </div>
         </div>
 
-        <div class="col s12 m4">
+        <div class="col s12 m6">
           <div class="icon-block">
-            <h2 class="center red-text text-darken-4"><i class="material-icons">group</i></h2>
-            <h5 class="center">User Experience Focused</h5>
-
-            <p class="light">By utilizing elements and principles of Material Design, we were able to create a framework that incorporates components and animations that provide more feedback to users. Additionally, a single underlying responsive system across all platforms allow for a more unified user experience.</p>
+            <h2 class="center burgundy-text"><i class="fa-solid fa-wine-glass"></i></i></h2>
+            <h5 class="center">Ver todos los vinos</h5>
+            <p class="">Si ya sabes que vino estas buscando. Vamos directamente a nuestro buscador de vinos para empezar.</p>
+            <br>
+            <div class="center">
+              <a href="{% url 'wine-list' %}" class="btn waves-effect waves-light burgundy">Ir a la lista</a>
+            </div>
           </div>
         </div>
 
-        <div class="col s12 m4">
-          <div class="icon-block">
-            <h2 class="center red-text text-darken-4"><i class="material-icons">settings</i></h2>
-            <h5 class="center">Easy to work with</h5>
-
-            <p class="light">We have provided detailed documentation as well as specific code examples to help new users get started. We are also always open to feedback and can answer any questions a user may have about Materialize.</p>
-          </div>
-        </div>
       </div>
 
     </div>
   </div>
 
 
-  <div class="parallax-container valign-wrapper">
-    <div class="section no-pad-bot">
+  <div class="parallax-container" style="min-height: 250px">
+    <div class="section">
       <div class="container">
         <div class="row center">
-          <h5 class="header col s12 light">A modern responsive front-end framework based on Material Design</h5>
+          <h5 class="header col s12 light"></h5>
         </div>
       </div>
     </div>
@@ -77,8 +71,16 @@
       <div class="row">
         <div class="col s12 center">
           <h3><i class="mdi-content-send brown-text"></i></h3>
-          <h4>Contact Us</h4>
-          <p class="left-align light">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque id nunc nec volutpat. Etiam pellentesque tristique arcu, non consequat magna fermentum ac. Cras ut ultricies eros. Maecenas eros justo, ullamcorper a sapien id, viverra ultrices eros. Morbi sem neque, posuere et pretium eget, bibendum sollicitudin lacus. Aliquam eleifend sollicitudin diam, eu mattis nisl maximus sed. Nulla imperdiet semper molestie. Morbi massa odio, condimentum sed ipsum ac, gravida ultrices erat. Nullam eget dignissim mauris, non tristique erat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>
+          <h4>Sobre este proyecto</h4>
+          <br>
+          <p class="justify-text">
+            Everyone at some point has needed to buy a wine for an occasion and nowadays is really easy to feel overwhelmed by the insane number of choices and the lack of information when entering a cellar or walking through supermarket aisles.
+            Choosing the right one without any recommendation from cellar owner often becomes a decision based only in the wine price and the wine label. 
+            <br><br>
+            Making a good recommendation is a hot topic in Data Science as it continues to present research challenges as well as strong practical benefits for many different areas (movies,music,restaurants,etc...).
+            Furthermore, improving the recommendation presentation, helping users to understand, explore, and even control recommender systems has recently risen a lot attention.
+          </p>
+          <br>
         </div>
       </div>
 
@@ -86,13 +88,8 @@
   </div>
 
 
-  <div class="parallax-container valign-wrapper">
-    <div class="section no-pad-bot">
-      <div class="container">
-        <div class="row center">
-          <h5 class="header col s12 light">A modern responsive front-end framework based on Material Design</h5>
-        </div>
-      </div>
+  <div class="parallax-container" style="min-height: 250px">
+    <div class="section">
     </div>
     <div class="parallax"><img src="{% static 'web/background6.jpg' %}" alt="Unsplashed background img 3"></div>
   </div>
