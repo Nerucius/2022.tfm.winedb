@@ -85,19 +85,28 @@ def wine_search(request):
     })
 
 
+# Load ML Predictor pickles
+
+ml_path = os.path.join(os.path.dirname(__file__), "ml")
+sys.path.append(ml_path)
+
+filename = os.path.join(ml_path, "CBR.pickle")
+with open(filename, 'rb') as f:
+    ML_RECOMMEND_SIMILAR = pickle.load(f)
+
+filename = os.path.join(ml_path, "CBRDO.pickle")
+with open(filename, 'rb') as f:
+    ML_RECOMMEND_STYLE = pickle.load(f)
+
+filename = os.path.join(ml_path, "predictDO.pickle")
+with open(filename, 'rb') as f:
+    ML_PREDICT_DO = pickle.load(f)
+
 # ML APIs
 
 def wine_recommender_similarity(request, wine_id):
-    ml_path = os.path.join(os.path.dirname(__file__), "ml")
-    sys.path.append(ml_path)
-
-    filename = os.path.join(ml_path, "CBR.pickle")
-    file_to_read = open(filename, "rb")
-    loaded_predictor = pickle.load(file_to_read)
-    file_to_read.close()
-
     # Returns pandas with wine as index, CS as cosine similarity
-    predictions = loaded_predictor.predict(wine_id)
+    predictions = ML_RECOMMEND_SIMILAR.predict(wine_id)
 
     wines = Wine.objects.filter(pk__in=predictions[:10].index)
     wines = WineSerializer.serialize(wines)
@@ -110,18 +119,10 @@ def wine_recommender_similarity(request, wine_id):
     })
 
 def wine_recommender_style_do(request, *args, **kwargs):
-    ml_path = os.path.join(os.path.dirname(__file__), "ml")
-    sys.path.append(ml_path)
-
-    filename = os.path.join(ml_path, "CBRDO.pickle")
-    file_to_read = open(filename, "rb")
-    loaded_predictor = pickle.load(file_to_read)
-    file_to_read.close()
-
     features = request.GET["features"].split(",")
 
     # Returns pandas
-    predictions = loaded_predictor.predict(features)
+    predictions = ML_RECOMMEND_STYLE.predict(features)
 
     wines = Wine.objects.filter(pk__in=predictions[:10].index)
     wines = WineSerializer.serialize(wines)
@@ -134,15 +135,7 @@ def wine_recommender_style_do(request, *args, **kwargs):
 
 
 def predict_do(request, *args, **kwargs):
-    ml_path = os.path.join(os.path.dirname(__file__), "ml")
-    sys.path.append(ml_path)
-
-    filename = os.path.join(ml_path, "predictDO.pickle")
-    file_to_read = open(filename, "rb")
-    loaded_predictor = pickle.load(file_to_read)
-    file_to_read.close()
-
-    predictions = loaded_predictor.predict_do(request.GET["style"].split(","))
+    predictions = ML_PREDICT_DO.predict_do(request.GET["style"].split(","))
 
     return HttpResponse(
         # json.dumps({'response': mock_data}),
