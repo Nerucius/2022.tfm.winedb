@@ -14,3 +14,6 @@
 *.log
 *.pot
 local_settings.py
+
+# Ignore autogluon models
+**/ml/ag-*

@@ -10,6 +10,9 @@ from urllib.parse import quote as urlencode
 from api.serializers import WineSerializer
 from api.models import Wine
 
+from api.ml.predictDO import multiple_autogluonClassifier
+
+
 PAGE_SIZE = 20
 
 def get_request_url(request):
@@ -98,9 +101,12 @@ filename = os.path.join(ml_path, "CBRDO.pickle")
 with open(filename, 'rb') as f:
     ML_RECOMMEND_STYLE = pickle.load(f)
 
-filename = os.path.join(ml_path, "predictDO.pickle")
-with open(filename, 'rb') as f:
-    ML_PREDICT_DO = pickle.load(f)
+# filename = os.path.join(ml_path, "predictDO.pickle")
+# with open(filename, 'rb') as f:
+#    ML_PREDICT_DO = pickle.load(f)
+filepath = os.path.join(ml_path, "ag-20220820_164753")
+ML_PREDICT_DO = multiple_autogluonClassifier(filepath)
+
 
 # ML APIs
 
