@@ -104,7 +104,7 @@ with open(filename, 'rb') as f:
 # filename = os.path.join(ml_path, "predictDO.pickle")
 # with open(filename, 'rb') as f:
 #    ML_PREDICT_DO = pickle.load(f)
-filepath = os.path.join(ml_path, "ag-20220820_164753")
+filepath = os.path.join(ml_path, "ag-model")
 ML_PREDICT_DO = multiple_autogluonClassifier(filepath)
 
 
