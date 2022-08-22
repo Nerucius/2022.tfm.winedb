@@ -489,8 +489,8 @@
 
           getRelationStyle(a, b, limit=99){
             let common = [];
-            let aStyles = [...a.style, ...a.color, ...a.smell]
-            let bStyles = [...b.style, ...b.color, ...b.smell]
+            let aStyles = [...a.style, /*...a.color, ...a.smell*/]
+            let bStyles = [...b.style, /*...b.color, ...b.smell*/]
 
             // Find styles that B has that A doesn't
             for(bS of bStyles){
