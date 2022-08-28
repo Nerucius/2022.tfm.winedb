@@ -1,5 +1,5 @@
 # Wine Recommender App through wine features analysis plus visualization
-## Masters Thesis Project
+_Masters Thesis Project_
 _University of Barcelona, Master in Foundations of Data Science_
 
 ## About this Repository
