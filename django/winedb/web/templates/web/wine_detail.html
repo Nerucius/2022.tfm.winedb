@@ -26,8 +26,14 @@
     dd{
       font-weight: bold;
     }
+    .card{
+      overflow: hidden;
+    }
     #do-map{
       height: 380px;
+    }
+    .do-img-container{
+      margin: 7.5px 0;
     }
     dd .btn-small{
       font-weight: normal;
@@ -50,7 +56,6 @@
     .current-wine{
       font-weight: bold;
     }
-
     .hover-info{
       position: absolute;
       top: 0px;
@@ -99,7 +104,7 @@
         <!-- Wine card -->
         <div class="col m6 s12">
           <!-- Card -->
-          <div class="card" id="wine-card">
+          <div class="card" :id="`wine-card-${wine.id}`">
             <div class="card-content">
               <span class="card-title">Carta del Vino</span>
               <div class="row" style="margin:0">
@@ -131,9 +136,13 @@
 
         <!-- DO Map -->
         <div class="col m6 s12">
-          <div class="card">
-            <div id="do-map" :style="{'height': wineCardHeight() }"></div>
-          </div>
+            <!-- <div id="do-map" :style="{'height': wineCardHeight }"></div> -->
+            <div class="do-img-container valign-wrapper" :style="{'height': wineCardHeight}">
+              <img
+                style="width: 100%;"
+                :src="wine.do_image_url"
+              />
+            </div>
         </div>
         <!-- /DO Map -->
 
@@ -302,15 +311,20 @@
           wineId: '{{ wine_id }}',
           wine: null,
           wineList: null,
+          
           similarWines: [],
           similarWineSelected: null,
+          
           graph: null,
           graphNodeIds: [],
           hoverWine: null,
           stickHoverInfo: false,
           showHoverInfo: false,
+
           expandedWine: null,
-          expandedWineRecomended: []
+          expandedWineRecomended: [],
+
+          wineCardHeight: '450px',
         }
       },
 
@@ -325,6 +339,8 @@
         this.setExpandedWineAndRecs(this.wine, this.similarWines);
 
         this.createWineRadarplot('currentRadar', this.wine);
+
+        setTimeout(() => this.recalcWineCardHeight(), 1)
       },
 
       methods:{
@@ -351,6 +367,8 @@
           },
 
           createMap(){
+            return;
+
             var map = L.map('do-map',{
               center: [0,0],
               dragging: false,
@@ -398,7 +416,7 @@
             this.expandedWineRecomended = recWines;
             setTimeout(() =>{
               for(rw of recWines){
-                this.createWineRadarplot(`radar-compare-${rw.id}`, rw, wine, 330)
+                this.createWineRadarplot(`radar-compare-${rw.id}`, rw, wine, 330, "Comparativa de Estilos")
               }
             }, 300)
           },
@@ -510,7 +528,7 @@
             return common.join(', ')
           },
 
-          createWineRadarplot(selector, wine, compared=null, height=425){
+          createWineRadarplot(selector, wine, compared=null, height=425, title="Analisis de Estilo"){
             data = []
 
             if(!!compared){
@@ -542,9 +560,9 @@
               showlegend: false,
               autosize: true,
               height: height,
-              title: 'Atributos AXII',
+              title: title,
               polar: {radialaxis: {visible: false,
-                // range: [0, 1]
+                range: [0, 1]
               }},
             }
 
@@ -568,10 +586,16 @@
             return "{% static 'web/tinto.png' %}";
           },
 
-          wineCardHeight(){
-            let el = document.getElementById('wine-card');
-            if(el == null) return '380px'
-            return el.clientHeight + 'px';
+          recalcWineCardHeight(){
+            let wineId = this.wine.id
+
+            let el = document.getElementById(`wine-card-${wineId}`);
+            if(el == null){
+              console.log('not found')
+              this.wineCardHeight = '450px'
+            }
+            console.log('found')
+            this.wineCardHeight = el.clientHeight + 'px';
           }
       },
 

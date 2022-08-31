@@ -7,6 +7,7 @@ urlpatterns = [
     path('wine/<str:wine_id>/', views.wine_detail, name='api-wine-detail'),
     path('wines/', views.wine_list, name='api-wine-list'),
     path('wines/search/', views.wine_search, name='api-wine-search'),
+    path('zones/', views.do_list, name='api-do-list'),
 
     path('wine/ml/', views.dummy, name='api-wine-ml-base'),
     path('wine/ml/<str:wine_id>/similar/', views.wine_recommender_similarity, name='api-wine-ml-similar'),

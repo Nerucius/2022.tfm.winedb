@@ -5,6 +5,7 @@ import sys
 import re
 
 from django.shortcuts import render, HttpResponse, resolve_url
+from django.templatetags.static import static
 from urllib.parse import quote as urlencode
 
 from api.serializers import WineSerializer
@@ -15,6 +16,8 @@ from api.ml.predictDO import multiple_autogluonClassifier
 
 PAGE_SIZE = 20
 
+## Util Functions
+
 def get_request_url(request):
     return re.sub(r'\?.*', '',request.build_absolute_uri())
 
@@ -24,6 +27,8 @@ def anotate_resource_links(wine_list, request):
 
     for wine in wine_list:
         wine['$link'] = host + resolve_url('api-wine-detail', wine_id=wine["id"])
+        # wine['do_image_route'] = 'web/do_img/' + normalize_do_name(wine['zone']) + '.jpg'
+        wine['do_image_url']  = static('web/do_img/' + normalize_do_name(wine['zone']) + '.jpg')
 
     return wine_list
 
@@ -31,6 +36,16 @@ def json_response(data, status=200):
     return HttpResponse(
         json.dumps(data), status=status, content_type="application/json"
     )
+
+def normalize_do_name(name):
+    # lowercase
+    name = name.lower()
+    # no spacing or dots
+    name = name.split('/ ')[0].strip().replace('.','').replace(' ', '_')
+    # no special characters
+    name = re.sub(r'[^a-zA-Z\d_]', 'x', name)
+
+    return name
 
 def dummy(request, *args, **kwargs):
     return HttpResponse(
@@ -41,10 +56,10 @@ def dummy(request, *args, **kwargs):
 
 def wine_detail(request, wine_id):
     wine = Wine.objects.get(pk=wine_id)
-    wine_serialized = WineSerializer.serialize([wine,])[0]
+    wines_serialized = WineSerializer.serialize([wine,])
+    wines_serialized = anotate_resource_links(wines_serialized, request)
 
-    return json_response({"data": wine_serialized})
-
+    return json_response({"data": wines_serialized[0]})
 
 def wine_list(request):
     page = 1
@@ -139,7 +154,6 @@ def wine_recommender_style_do(request, *args, **kwargs):
         "data": anotate_resource_links(wines, request)
     })
 
-
 def predict_do(request, *args, **kwargs):
     predictions = ML_PREDICT_DO.predict_do(request.GET["style"].split(","))
 
@@ -148,3 +162,15 @@ def predict_do(request, *args, **kwargs):
         json.dumps({"response": predictions}),
         "application/json",
     )
+
+def do_list(request):
+    zones_query = Wine.objects.raw('SELECT slug, max(zone) as zone FROM api_wine GROUP BY zone')
+    zones_list = []
+
+    for row in zones_query:
+        zones_list += [{
+            "slug": normalize_do_name(row.zone),
+            "name": row.zone,
+        }]
+
+    return json_response({'data': zones_list})
