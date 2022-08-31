@@ -134,7 +134,7 @@
 
                 <!-- Page 2 - Denominacions -->
                 <div class="card-content" key="page2" v-if="page == 'page2'">
-                  <span class="card-title">Segons les teves preferencies, et podem recomanar les seguents D.O.s:</span>
+                  <span class="card-title">Segun tus preferencias, te podemos recomendar las Denominaciones de Origen:</span>
                   <br>
                   <div class="button-flex" style="justify-content: center">
                     <span v-for="style in selected" readonly class="btn-flat btn-small grey lighten-3">[[style]]</span>
@@ -167,7 +167,7 @@
 
                 <!-- Page 3 - Variety and Final Recomendation -->
                 <div class="card-content" key="page3" v-if="page == 'page3'">
-                  <span class="card-title">Dins d'aquesta D.O. et podem recomanar els seguents vins:</span>
+                  <span class="card-title">Dentro de esta Denominacion de Origen, los vinos que más se ajustan a ti son:</span>
                   <br>
                   <div class="button-flex" style="justify-content: center">
                     <a class="btn-flat btn-small grey lighten-3">[[ selectedDO.name ]]</a>
